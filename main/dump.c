@@ -5,6 +5,7 @@
 #include "esp_cpu.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_timer.h"
 
 
 #define PUF_SIZE 1024
@@ -29,21 +30,6 @@ static const char *reset_reason_str(esp_reset_reason_t r) //the type come from e
     }
 }
 
-static void print_stats(const uint8_t *buf, size_t len)
-{
-    size_t ones = 0, zeros = 0, ff_bytes = 0;
-
-    for (size_t i=0; i<len ; i++){
-        if (buf[i]== 0x00) zeros++;
-        else if (buf[i]== 0xff) ff_bytes++;
-        else ones = __builtin_popcount(buf[i]);  //count the number of 1 bits in the byte
-    }
-
-     printf("STATS ones=%u/%u (%.2f%%) zero_bytes=%u ff_bytes=%u\n",
-           (unsigned)ones, (unsigned)(len * 8),
-           100.0 * ones / (len * 8),
-           (unsigned)zeros, (unsigned)ff_bytes);
-}
 
 void app_main(void){
 
@@ -51,27 +37,30 @@ void app_main(void){
 
     esp_reset_reason_t reason = esp_reset_reason(); //get the reset reason
 
-    vTaskDelay(pdMS_TO_TICKS(500)); //wait for 1 second
 
-    printf("\n");
-    printf("=== PUF DUMP BEGIN ===\n");
-    printf("RESET_REASON %s\n", reset_reason_str(reason));
-    printf("ADDR %p\n", (void *)puf);
-    printf("SIZE %d\n", PUF_SIZE);
+   unsigned ones = 0;
+   for(int i =0; i< PUF_SIZE; i++){
+    ones += __builtin_popcount(snapshot[i]); //count the number of ones in the snapshot
+   }
 
-    print_stats(snapshot, PUF_SIZE);
+   for(uint32_t seq=0; ;seq++){
+        printf("\n=== PUF DUMP BEGIN ===\n");
+        printf("SEQ %lu\n", (unsigned long)seq);
+        printf("UPTIME_MS %lld\n", (long long)(esp_timer_get_time() / 1000));
+        printf("RESET_REASON %s\n", reset_reason_str(reason));
+        printf("ADDR %p\n", (void *)puf);
+        printf("SIZE %d\n", PUF_SIZE);
+        printf("ONES %u\n", ones);
+        printf("DATA ");
 
-     printf("DATA ");
-    for (int i = 0; i < PUF_SIZE; i++) {
-        printf("%02x", snapshot[i]);
-    }
-    printf("\n");
-    printf("=== PUF DUMP END ===\n");
+        for (int i =0; i<PUF_SIZE; i++){
+            printf("%02X", snapshot[i]);
+        }
+
+        printf("\n=== PUF DUMP END ===\n");
  
-    /* Nessun restart automatico: il riavvio lo controlli tu,
-     * staccando l'alimentazione. */
-    while (1) {
-        vTaskDelay(pdMS_TO_TICKS(1000));
-    }
+        vTaskDelay(pdMS_TO_TICKS(2000));
+
+   }
 
 }
