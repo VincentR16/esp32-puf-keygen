@@ -4,3 +4,6 @@ managed_components/
 dependencies.lock
 .DS_Store
 data/
+.venv/
+.vscode/
+.__pycache__/
