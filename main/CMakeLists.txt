@@ -1,2 +1,2 @@
-idf_component_register(SRCS "dump.c"
-                    INCLUDE_DIRS ".")
+idf_component_register(SRCS "boot.c"
+                    INCLUDE_DIRS ".")   
