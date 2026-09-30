@@ -19,9 +19,8 @@ import argparse
 import os
 import sys
 
-from cryptography.hazmat.primitives import serialization
-
 import fuzzy
+from cryptography.hazmat.primitives import serialization
 from enroll import PK_PATH, key_id
 from helperdata import HelperData
 from mask import to_bits
