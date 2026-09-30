@@ -17,8 +17,7 @@
 #include "freertos/task.h"
 #include "heap_memory_layout.h"
 
-#define PUF_ADDR 0x3FFDFC00     /* last KB of the main DRAM region */
-#define PUF_SIZE 1024
+#include "puf_region.h"
 
 /* Keep the heap away from the PUF region: nothing will ever write it. */
 SOC_RESERVE_MEMORY_REGION(PUF_ADDR, PUF_ADDR + PUF_SIZE, puf_region);

@@ -16,9 +16,9 @@
 #include "heap_memory_layout.h"
 #include "nvs.h"
 #include "nvs_flash.h"
+#include "puf_region.h"
 
-#define PUF_ADDR    0x3FFDFC00      /* fixed, same as the measurement firmware */
-#define PUF_SIZE    1024            /* SRAM region, bytes */
+
 #define HD_SIZE     1237            /* helper data, bytes */
 #define HD_MASK     21              /* offset of the mask */
 
