@@ -16,14 +16,14 @@
 #include "heap_memory_layout.h"
 #include "nvs.h"
 #include "nvs_flash.h"
-#include "puf_region.h"
 
+#include "puf_region.h"
 
 #define HD_SIZE     1237            /* helper data, bytes */
 #define HD_MASK     21              /* offset of the mask */
 
 /* Keep the heap away from the PUF region: nothing will ever write it. */
-SOC_RESERVE_MEMORY_REGION(PUF_ADDR, PUF_ADDR + PUF_SIZE, puf_region);
+SOC_RESERVE_MEMORY_REGION(PUF_ADDR, PUF_ADDR + PUF_SIZE, puf_reserved);
 
 static uint8_t snapshot[PUF_SIZE];
 static uint8_t hd[HD_SIZE];
@@ -70,7 +70,10 @@ static void load_helper_data(void)
 void app_main(void)
 {
     /* First instruction: copy the SRAM before anything else writes to it. */
-    memcpy(snapshot, (const void *)PUF_ADDR, PUF_SIZE);
+    const volatile uint8_t *p = puf_region();
+    for (int i = 0; i < PUF_SIZE; i++) {
+        snapshot[i] = p[i];
+    }
 
     load_helper_data();
 
