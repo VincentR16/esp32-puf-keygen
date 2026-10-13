@@ -1,0 +1,727 @@
+--- 0x40080400: _invalid_pc_placeholder at /Users/vincenzo/esp32/esp-idf/components/xtensa/xtensa_vectors.S:2259
+entry 0x40080614
+--- 0x40080614: call_start_cpu0 at /Users/vincenzo/esp32/esp-idf/components/bootloader/subproject/main/bootloader_start.c:27
+I (29) boot: ESP-IDF v6.1-dev-7651-gc712a0dde38 2nd stage bootloader
+I (29) boot: compile time Sep 10 2026 17:07:48
+I (30) boot: chip revision: v3.1
+I (32) boot.esp32: SPI Speed      : 40MHz
+I (36) boot.esp32: SPI Mode       : DIO
+I (39) boot.esp32: SPI Flash Size : 2MB
+I (43) boot: Partition Table:
+I (46) boot: ## Label            Usage          Type ST Offset   Length
+I (52) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (58) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (65) boot:  2 factory          factory app      00 00 00010000 00100000
+I (72) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=0af10h ( 44816) map
+I (96) esp_image: segment 1: paddr=0001af38 vaddr=3ffb0000 size=02c4ch ( 11340) load
+I (101) esp_image: segment 2: paddr=0001db8c vaddr=40080000 size=0248ch (  9356) load
+I (105) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=1e86ch (125036) map
+I (153) esp_image: segment 4: paddr=0003e894 vaddr=4008248c size=08db8h ( 36280) load
+I (169) esp_image: segment 5: paddr=00047654 vaddr=50000000 size=00028h (    40) load
+I (175) boot: Loaded app from partition at offset 0x10000
+I (183) cpu_start: Multicore app
+I (191) cpu_start: GPIO 3 and 1 are used as console UART I/O pins
+I (191) cpu_start: Pro cpu start user code
+I (191) cpu_start: cpu freq: 160000000 Hz
+I (193) app_init: Application information:
+I (197) app_init: Project name:     puf-dump
+I (201) app_init: App version:      39f7f67-dirty
+I (205) app_init: Compile time:     Oct 12 2026 15:30:43
+I (210) app_init: ELF file SHA256:  90b06d7f5...
+I (215) app_init: ESP-IDF:          v6.1-dev-7651-gc712a0dde38
+I (220) efuse_init: Min chip rev:     v0.0
+I (224) efuse_init: Max chip rev:     v3.99 
+I (228) efuse_init: Chip rev:         v3.1
+I (232) heap_init: Initializing. RAM available for dynamic allocation:
+I (238) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM
+I (243) heap_init: At 3FFB3FB0 len 0002BC50 (175 KiB): DRAM
+I (248) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM
+I (254) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM
+I (259) heap_init: At 4008B244 len 00014DBC (83 KiB): IRAM
+I (266) spi_flash: detected chip: generic
+I (268) spi_flash: flash io: dio
+W (271) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (285) main_task: Started on CPU0
+I (285) main_task: Calling app_main()
+Signature OK
+
+Helper data: 1237 bytes, version 1
+  MAC     d4:e9:f4:ed:8c:00
+  region  0x3FFDFC00, 1024 bytes
+  BCH(255, 179, t=10) x4
+  cells   1020 selected
+All checks passed.
+
+WPRIME f6c80459a9942a2a585a71571185a0d5c9b956233f631841b7785136a2819340c8359b2fb58d953a09b703127059b5db0e6fb2d8e89f540511398ea71ced1c3c8e67c7f64f2310eb773b3ab6f4db2cd99fa15c159fdfef67ee7a3fdcbd67757e6402060287ae1ec6f21142bc2d6fa621ca56227fa732e47fcb1abd242a110f20
+KEYID b56b53bceb9dd7b1
+(no BCH yet: equals the enrollment key id only if w' has 0 errors)
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x17 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:6156
+ho 0 tail 12 room 4
+load:0x40078000,len:15712
+load:0x40080400,len:3860
+--- 0x40080400: _invalid_pc_placeholder at /Users/vincenzo/esp32/esp-idf/components/xtensa/xtensa_vectors.S:2259
+entry 0x40080614
+--- 0x40080614: call_start_cpu0 at /Users/vincenzo/esp32/esp-idf/components/bootloader/subproject/main/bootloader_start.c:27
+I (29) boot: ESP-IDF v6.1-dev-7651-gc712a0dde38 2nd stage bootloader
+I (29) boot: compile time Sep 10 2026 17:07:48
+I (30) boot: chip revision: v3.1
+I (32) boot.esp32: SPI Speed      : 40MHz
+I (36) boot.esp32: SPI Mode       : DIO
+I (39) boot.esp32: SPI Flash Size : 2MB
+I (43) boot: Partition Table:
+I (46) boot: ## Label            Usage          Type ST Offset   Length
+I (52) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (58) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (65) boot:  2 factory          factory app      00 00 00010000 00100000
+I (72) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=0af10h ( 44816) map
+I (96) esp_image: segment 1: paddr=0001af38 vaddr=3ffb0000 size=02c4ch ( 11340) load
+I (101) esp_image: segment 2: paddr=0001db8c vaddr=40080000 size=0248ch (  9356) load
+I (105) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=1e86ch (125036) map
+I (153) esp_image: segment 4: paddr=0003e894 vaddr=4008248c size=08db8h ( 36280) load
+I (169) esp_image: segment 5: paddr=00047654 vaddr=50000000 size=00028h (    40) load
+I (175) boot: Loaded app from partition at offset 0x10000
+I (183) cpu_start: Multicore app
+I (191) cpu_start: GPIO 3 and 1 are used as console UART I/O pins
+I (191) cpu_start: Pro cpu start user code
+I (191) cpu_start: cpu freq: 160000000 Hz
+I (193) app_init: Application information:
+I (197) app_init: Project name:     puf-dump
+I (201) app_init: App version:      39f7f67-dirty
+I (205) app_init: Compile time:     Oct 12 2026 15:30:43
+I (210) app_init: ELF file SHA256:  90b06d7f5...
+I (215) app_init: ESP-IDF:          v6.1-dev-7651-gc712a0dde38
+I (220) efuse_init: Min chip rev:     v0.0
+I (224) efuse_init: Max chip rev:     v3.99 
+I (228) efuse_init: Chip rev:         v3.1
+I (232) heap_init: Initializing. RAM available for dynamic allocation:
+I (238) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM
+I (243) heap_init: At 3FFB3FB0 len 0002BC50 (175 KiB): DRAM
+I (248) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM
+I (254) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM
+I (259) heap_init: At 4008B244 len 00014DBC (83 KiB): IRAM
+I (266) spi_flash: detected chip: generic
+I (268) spi_flash: flash io: dio
+W (271) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (285) main_task: Started on CPU0
+I (285) main_task: Calling app_main()
+Signature OK
+
+Helper data: 1237 bytes, version 1
+  MAC     d4:e9:f4:ed:8c:00
+  region  0x3FFDFC00, 1024 bytes
+  BCH(255, 179, t=10) x4
+  cells   1020 selected
+All checks passed.
+
+WPRIME f6c80459a9942a2a585a71571185a0d5c9b956233f631841b7785136a2819340c8359b2fb58d953a09b703127059b5db0e6fb2d8e89f540511398ea71ced1c3c8e67c7f64f2310eb773bbab6f4db2cd99fa158159fdfef67ee7a3fdcbd67757e6402060287ae1ec6f21142bc2d6fa621ca52227fa732e47fcb1abd242a110f20
+KEYID 9ed0c9e6c1fee570
+(no BCH yet: equals the enrollment key id only if w' has 0 errors)
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x17 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:6156
+ho 0 tail 12 room 4
+load:0x40078000,len:15712
+load:0x40080400,len:3860
+--- 0x40080400: _invalid_pc_placeholder at /Users/vincenzo/esp32/esp-idf/components/xtensa/xtensa_vectors.S:2259
+entry 0x40080614
+--- 0x40080614: call_start_cpu0 at /Users/vincenzo/esp32/esp-idf/components/bootloader/subproject/main/bootloader_start.c:27
+I (29) boot: ESP-IDF v6.1-dev-7651-gc712a0dde38 2nd stage bootloader
+I (29) boot: compile time Sep 10 2026 17:07:48
+I (30) boot: chip revision: v3.1
+I (32) boot.esp32: SPI Speed      : 40MHz
+I (36) boot.esp32: SPI Mode       : DIO
+I (39) boot.esp32: SPI Flash Size : 2MB
+I (43) boot: Partition Table:
+I (46) boot: ## Label            Usage          Type ST Offset   Length
+I (52) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (58) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (65) boot:  2 factory          factory app      00 00 00010000 00100000
+I (72) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=0af10h ( 44816) map
+I (96) esp_image: segment 1: paddr=0001af38 vaddr=3ffb0000 size=02c4ch ( 11340) load
+I (101) esp_image: segment 2: paddr=0001db8c vaddr=40080000 size=0248ch (  9356) load
+I (105) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=1e86ch (125036) map
+I (153) esp_image: segment 4: paddr=0003e894 vaddr=4008248c size=08db8h ( 36280) load
+I (169) esp_image: segment 5: paddr=00047654 vaddr=50000000 size=00028h (    40) load
+I (175) boot: Loaded app from partition at offset 0x10000
+I (183) cpu_start: Multicore app
+I (191) cpu_start: GPIO 3 and 1 are used as console UART I/O pins
+I (191) cpu_start: Pro cpu start user code
+I (191) cpu_start: cpu freq: 160000000 Hz
+I (193) app_init: Application information:
+I (197) app_init: Project name:     puf-dump
+I (201) app_init: App version:      39f7f67-dirty
+I (205) app_init: Compile time:     Oct 12 2026 15:30:43
+I (210) app_init: ELF file SHA256:  90b06d7f5...
+I (215) app_init: ESP-IDF:          v6.1-dev-7651-gc712a0dde38
+I (220) efuse_init: Min chip rev:     v0.0
+I (224) efuse_init: Max chip rev:     v3.99 
+I (228) efuse_init: Chip rev:         v3.1
+I (232) heap_init: Initializing. RAM available for dynamic allocation:
+I (238) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM
+I (243) heap_init: At 3FFB3FB0 len 0002BC50 (175 KiB): DRAM
+I (248) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM
+I (254) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM
+I (259) heap_init: At 4008B244 len 00014DBC (83 KiB): IRAM
+I (266) spi_flash: detected chip: generic
+I (268) spi_flash: flash io: dio
+W (271) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (285) main_task: Started on CPU0
+I (285) main_task: Calling app_main()
+Signature OK
+
+Helper data: 1237 bytes, version 1
+  MAC     d4:e9:f4:ed:8c:00
+  region  0x3FFDFC00, 1024 bytes
+  BCH(255, 179, t=10) x4
+  cells   1020 selected
+All checks passed.
+
+WPRIME f6c80459a9942a2a585271571185a0d5c9b956233f631841b7785136a2819340c8359b2fb58d953a09b703127059b5db0e6fb2d8e89f540511398ea71ced1c3c8e67c7f64f2310eb773bbab6f4db2cd99fa158159fdfef67ee7a3fdcbd67757e6402060287ae1ec6f21142bc2d6fa621ca52227fa732e47fcb1abd242a110f20
+KEYID 91a3842700d25fbc
+(no BCH yet: equals the enrollment key id only if w' has 0 errors)
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x17 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:6156
+ho 0 tail 12 room 4
+load:0x40078000,len:15712
+load:0x40080400,len:3860
+--- 0x40080400: _invalid_pc_placeholder at /Users/vincenzo/esp32/esp-idf/components/xtensa/xtensa_vectors.S:2259
+entry 0x40080614
+--- 0x40080614: call_start_cpu0 at /Users/vincenzo/esp32/esp-idf/components/bootloader/subproject/main/bootloader_start.c:27
+I (29) boot: ESP-IDF v6.1-dev-7651-gc712a0dde38 2nd stage bootloader
+I (29) boot: compile time Sep 10 2026 17:07:48
+I (30) boot: chip revision: v3.1
+I (32) boot.esp32: SPI Speed      : 40MHz
+I (36) boot.esp32: SPI Mode       : DIO
+I (39) boot.esp32: SPI Flash Size : 2MB
+I (43) boot: Partition Table:
+I (46) boot: ## Label            Usage          Type ST Offset   Length
+I (52) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (58) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (65) boot:  2 factory          factory app      00 00 00010000 00100000
+I (72) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=0af10h ( 44816) map
+I (96) esp_image: segment 1: paddr=0001af38 vaddr=3ffb0000 size=02c4ch ( 11340) load
+I (101) esp_image: segment 2: paddr=0001db8c vaddr=40080000 size=0248ch (  9356) load
+I (105) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=1e86ch (125036) map
+I (153) esp_image: segment 4: paddr=0003e894 vaddr=4008248c size=08db8h ( 36280) load
+I (169) esp_image: segment 5: paddr=00047654 vaddr=50000000 size=00028h (    40) load
+I (175) boot: Loaded app from partition at offset 0x10000
+I (183) cpu_start: Multicore app
+I (191) cpu_start: GPIO 3 and 1 are used as console UART I/O pins
+I (191) cpu_start: Pro cpu start user code
+I (191) cpu_start: cpu freq: 160000000 Hz
+I (193) app_init: Application information:
+I (197) app_init: Project name:     puf-dump
+I (201) app_init: App version:      39f7f67-dirty
+I (205) app_init: Compile time:     Oct 12 2026 15:30:43
+I (210) app_init: ELF file SHA256:  90b06d7f5...
+I (215) app_init: ESP-IDF:          v6.1-dev-7651-gc712a0dde38
+I (220) efuse_init: Min chip rev:     v0.0
+I (224) efuse_init: Max chip rev:     v3.99 
+I (228) efuse_init: Chip rev:         v3.1
+I (232) heap_init: Initializing. RAM available for dynamic allocation:
+I (238) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM
+I (243) heap_init: At 3FFB3FB0 len 0002BC50 (175 KiB): DRAM
+I (248) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM
+I (254) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM
+I (259) heap_init: At 4008B244 len 00014DBC (83 KiB): IRAM
+I (266) spi_flash: detected chip: generic
+I (268) spi_flash: flash io: dio
+W (271) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (285) main_task: Started on CPU0
+I (285) main_task: Calling app_main()
+Signature OK
+
+Helper data: 1237 bytes, version 1
+  MAC     d4:e9:f4:ed:8c:00
+  region  0x3FFDFC00, 1024 bytes
+  BCH(255, 179, t=10) x4
+  cells   1020 selected
+All checks passed.
+
+WPRIME f6c80459a9942a2a585a71571185a0d5c9bd56233f631841b7785136a2819340c835bb2fb58d953a09b703127059b5db0e6fb2d8e89f540511398ea71ced1c3c8e67c7f64f2310eb773b3ab6f4db2cd99fa158159fdfef67ee7a3fdcbd67757e6402060287ae1ec6f21142bc2d6fa621ca52227fa732e47fcb1abd242a110f20
+KEYID 032a5aef6eeb80c0
+(no BCH yet: equals the enrollment key id only if w' has 0 errors)
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x17 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:6156
+ho 0 tail 12 room 4
+load:0x40078000,len:15712
+load:0x40080400,len:3860
+--- 0x40080400: _invalid_pc_placeholder at /Users/vincenzo/esp32/esp-idf/components/xtensa/xtensa_vectors.S:2259
+entry 0x40080614
+--- 0x40080614: call_start_cpu0 at /Users/vincenzo/esp32/esp-idf/components/bootloader/subproject/main/bootloader_start.c:27
+I (29) boot: ESP-IDF v6.1-dev-7651-gc712a0dde38 2nd stage bootloader
+I (29) boot: compile time Sep 10 2026 17:07:48
+I (30) boot: chip revision: v3.1
+I (32) boot.esp32: SPI Speed      : 40MHz
+I (36) boot.esp32: SPI Mode       : DIO
+I (39) boot.esp32: SPI Flash Size : 2MB
+I (43) boot: Partition Table:
+I (46) boot: ## Label            Usage          Type ST Offset   Length
+I (52) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (58) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (65) boot:  2 factory          factory app      00 00 00010000 00100000
+I (72) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=0af10h ( 44816) map
+I (96) esp_image: segment 1: paddr=0001af38 vaddr=3ffb0000 size=02c4ch ( 11340) load
+I (101) esp_image: segment 2: paddr=0001db8c vaddr=40080000 size=0248ch (  9356) load
+I (105) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=1e86ch (125036) map
+I (153) esp_image: segment 4: paddr=0003e894 vaddr=4008248c size=08db8h ( 36280) load
+I (169) esp_image: segment 5: paddr=00047654 vaddr=50000000 size=00028h (    40) load
+I (175) boot: Loaded app from partition at offset 0x10000
+I (183) cpu_start: Multicore app
+I (191) cpu_start: GPIO 3 and 1 are used as console UART I/O pins
+I (191) cpu_start: Pro cpu start user code
+I (191) cpu_start: cpu freq: 160000000 Hz
+I (193) app_init: Application information:
+I (197) app_init: Project name:     puf-dump
+I (201) app_init: App version:      39f7f67-dirty
+I (205) app_init: Compile time:     Oct 12 2026 15:30:43
+I (210) app_init: ELF file SHA256:  90b06d7f5...
+I (215) app_init: ESP-IDF:          v6.1-dev-7651-gc712a0dde38
+I (220) efuse_init: Min chip rev:     v0.0
+I (224) efuse_init: Max chip rev:     v3.99 
+I (228) efuse_init: Chip rev:         v3.1
+I (232) heap_init: Initializing. RAM available for dynamic allocation:
+I (238) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM
+I (243) heap_init: At 3FFB3FB0 len 0002BC50 (175 KiB): DRAM
+I (248) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM
+I (254) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM
+I (259) heap_init: At 4008B244 len 00014DBC (83 KiB): IRAM
+I (266) spi_flash: detected chip: generic
+I (268) spi_flash: flash io: dio
+W (271) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (285) main_task: Started on CPU0
+I (285) main_task: Calling app_main()
+Signature OK
+
+Helper data: 1237 bytes, version 1
+  MAC     d4:e9:f4:ed:8c:00
+  region  0x3FFDFC00, 1024 bytes
+  BCH(255, 179, t=10) x4
+  cells   1020 selected
+All checks passed.
+
+WPRIME f6c80459a9942a2a585a71571185a0d5c9b956233f631841b7785136a2819340c8359b2fb58d953a09b703127059b5db0e6fb2d8e89f540511398ea71ced1c3c8e67c7f64f2310eb773bbab6f4db2cd99fa158159fdfef67ee7a3fdcbd67757e6402060287ae1ec6f21142bc2d6fa621ca52227fa732e47fcb1abd242a110f20
+KEYID 9ed0c9e6c1fee570
+(no BCH yet: equals the enrollment key id only if w' has 0 errors)
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x17 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:6156
+ho 0 tail 12 room 4
+load:0x40078000,len:15712
+load:0x40080400,len:3860
+--- 0x40080400: _invalid_pc_placeholder at /Users/vincenzo/esp32/esp-idf/components/xtensa/xtensa_vectors.S:2259
+entry 0x40080614
+--- 0x40080614: call_start_cpu0 at /Users/vincenzo/esp32/esp-idf/components/bootloader/subproject/main/bootloader_start.c:27
+I (29) boot: ESP-IDF v6.1-dev-7651-gc712a0dde38 2nd stage bootloader
+I (29) boot: compile time Sep 10 2026 17:07:48
+I (30) boot: chip revision: v3.1
+I (32) boot.esp32: SPI Speed      : 40MHz
+I (36) boot.esp32: SPI Mode       : DIO
+I (39) boot.esp32: SPI Flash Size : 2MB
+I (43) boot: Partition Table:
+I (46) boot: ## Label            Usage          Type ST Offset   Length
+I (52) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (58) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (65) boot:  2 factory          factory app      00 00 00010000 00100000
+I (72) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=0af10h ( 44816) map
+I (96) esp_image: segment 1: paddr=0001af38 vaddr=3ffb0000 size=02c4ch ( 11340) load
+I (101) esp_image: segment 2: paddr=0001db8c vaddr=40080000 size=0248ch (  9356) load
+I (105) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=1e86ch (125036) map
+I (153) esp_image: segment 4: paddr=0003e894 vaddr=4008248c size=08db8h ( 36280) load
+I (169) esp_image: segment 5: paddr=00047654 vaddr=50000000 size=00028h (    40) load
+I (175) boot: Loaded app from partition at offset 0x10000
+I (183) cpu_start: Multicore app
+I (191) cpu_start: GPIO 3 and 1 are used as console UART I/O pins
+I (191) cpu_start: Pro cpu start user code
+I (191) cpu_start: cpu freq: 160000000 Hz
+I (193) app_init: Application information:
+I (197) app_init: Project name:     puf-dump
+I (201) app_init: App version:      39f7f67-dirty
+I (205) app_init: Compile time:     Oct 12 2026 15:30:43
+I (210) app_init: ELF file SHA256:  90b06d7f5...
+I (215) app_init: ESP-IDF:          v6.1-dev-7651-gc712a0dde38
+I (220) efuse_init: Min chip rev:     v0.0
+I (224) efuse_init: Max chip rev:     v3.99 
+I (228) efuse_init: Chip rev:         v3.1
+I (232) heap_init: Initializing. RAM available for dynamic allocation:
+I (238) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM
+I (243) heap_init: At 3FFB3FB0 len 0002BC50 (175 KiB): DRAM
+I (248) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM
+I (254) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM
+I (259) heap_init: At 4008B244 len 00014DBC (83 KiB): IRAM
+I (266) spi_flash: detected chip: generic
+I (268) spi_flash: flash io: dio
+W (271) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (285) main_task: Started on CPU0
+I (285) main_task: Calling app_main()
+Signature OK
+
+Helper data: 1237 bytes, version 1
+  MAC     d4:e9:f4:ed:8c:00
+  region  0x3FFDFC00, 1024 bytes
+  BCH(255, 179, t=10) x4
+  cells   1020 selected
+All checks passed.
+
+WPRIME f6c80459a9942a2a585a71571185a0d5c9b956233f631841b7785136a2819340c8359b2fb58d953a09b703127059b5db0e6fb2d8e89f540511398ea71ced1c3c8e67c7f64f2310eb773b3ab6f4db2cd99fa158159fdfef67ee7a3fdcbd67757e6402060287ae1ec6f21142bc2d6fa621ca52227fa732e47fcb1abd242a110f20
+KEYID 2b29173e07bb1391
+(no BCH yet: equals the enrollment key id only if w' has 0 errors)
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x17 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:6156
+ho 0 tail 12 room 4
+load:0x40078000,len:15712
+load:0x40080400,len:3860
+--- 0x40080400: _invalid_pc_placeholder at /Users/vincenzo/esp32/esp-idf/components/xtensa/xtensa_vectors.S:2259
+entry 0x40080614
+--- 0x40080614: call_start_cpu0 at /Users/vincenzo/esp32/esp-idf/components/bootloader/subproject/main/bootloader_start.c:27
+I (29) boot: ESP-IDF v6.1-dev-7651-gc712a0dde38 2nd stage bootloader
+I (29) boot: compile time Sep 10 2026 17:07:48
+I (30) boot: chip revision: v3.1
+I (32) boot.esp32: SPI Speed      : 40MHz
+I (36) boot.esp32: SPI Mode       : DIO
+I (39) boot.esp32: SPI Flash Size : 2MB
+I (43) boot: Partition Table:
+I (46) boot: ## Label            Usage          Type ST Offset   Length
+I (52) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (58) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (65) boot:  2 factory          factory app      00 00 00010000 00100000
+I (72) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=0af10h ( 44816) map
+I (96) esp_image: segment 1: paddr=0001af38 vaddr=3ffb0000 size=02c4ch ( 11340) load
+I (101) esp_image: segment 2: paddr=0001db8c vaddr=40080000 size=0248ch (  9356) load
+I (105) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=1e86ch (125036) map
+I (153) esp_image: segment 4: paddr=0003e894 vaddr=4008248c size=08db8h ( 36280) load
+I (169) esp_image: segment 5: paddr=00047654 vaddr=50000000 size=00028h (    40) load
+I (175) boot: Loaded app from partition at offset 0x10000
+I (183) cpu_start: Multicore app
+I (191) cpu_start: GPIO 3 and 1 are used as console UART I/O pins
+I (191) cpu_start: Pro cpu start user code
+I (191) cpu_start: cpu freq: 160000000 Hz
+I (193) app_init: Application information:
+I (197) app_init: Project name:     puf-dump
+I (201) app_init: App version:      39f7f67-dirty
+I (205) app_init: Compile time:     Oct 12 2026 15:30:43
+I (210) app_init: ELF file SHA256:  90b06d7f5...
+I (215) app_init: ESP-IDF:          v6.1-dev-7651-gc712a0dde38
+I (220) efuse_init: Min chip rev:     v0.0
+I (224) efuse_init: Max chip rev:     v3.99 
+I (228) efuse_init: Chip rev:         v3.1
+I (232) heap_init: Initializing. RAM available for dynamic allocation:
+I (238) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM
+I (243) heap_init: At 3FFB3FB0 len 0002BC50 (175 KiB): DRAM
+I (248) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM
+I (254) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM
+I (259) heap_init: At 4008B244 len 00014DBC (83 KiB): IRAM
+I (266) spi_flash: detected chip: generic
+I (268) spi_flash: flash io: dio
+W (271) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (285) main_task: Started on CPU0
+I (285) main_task: Calling app_main()
+Signature OK
+
+Helper data: 1237 bytes, version 1
+  MAC     d4:e9:f4:ed:8c:00
+  region  0x3FFDFC00, 1024 bytes
+  BCH(255, 179, t=10) x4
+  cells   1020 selected
+All checks passed.
+
+WPRIME f6c80459a9942a2a585a71571185a0d5c9b956233f631841b7785136a2819340c8359b2fb58d953a09b703127059b5db0e6fb2d8e89f540511398ea71ced1c3c8e67c7f64f2310eb773b3ab6f4db2cd99fa158159fdfef67ee7a1fdcbd67757e6402060287ae1ec6f21142bc2d6fa621ca52227fa732e47fcb1abd242a110f20
+KEYID 9a9703eec26bb320
+(no BCH yet: equals the enrollment key id only if w' has 0 errors)
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x17 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:6156
+ho 0 tail 12 room 4
+load:0x40078000,len:15712
+load:0x40080400,len:3860
+--- 0x40080400: _invalid_pc_placeholder at /Users/vincenzo/esp32/esp-idf/components/xtensa/xtensa_vectors.S:2259
+entry 0x40080614
+--- 0x40080614: call_start_cpu0 at /Users/vincenzo/esp32/esp-idf/components/bootloader/subproject/main/bootloader_start.c:27
+I (29) boot: ESP-IDF v6.1-dev-7651-gc712a0dde38 2nd stage bootloader
+I (29) boot: compile time Sep 10 2026 17:07:48
+I (30) boot: chip revision: v3.1
+I (32) boot.esp32: SPI Speed      : 40MHz
+I (36) boot.esp32: SPI Mode       : DIO
+I (39) boot.esp32: SPI Flash Size : 2MB
+I (43) boot: Partition Table:
+I (46) boot: ## Label            Usage          Type ST Offset   Length
+I (52) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (58) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (65) boot:  2 factory          factory app      00 00 00010000 00100000
+I (72) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=0af10h ( 44816) map
+I (96) esp_image: segment 1: paddr=0001af38 vaddr=3ffb0000 size=02c4ch ( 11340) load
+I (101) esp_image: segment 2: paddr=0001db8c vaddr=40080000 size=0248ch (  9356) load
+I (105) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=1e86ch (125036) map
+I (153) esp_image: segment 4: paddr=0003e894 vaddr=4008248c size=08db8h ( 36280) load
+I (169) esp_image: segment 5: paddr=00047654 vaddr=50000000 size=00028h (    40) load
+I (175) boot: Loaded app from partition at offset 0x10000
+I (183) cpu_start: Multicore app
+I (191) cpu_start: GPIO 3 and 1 are used as console UART I/O pins
+I (191) cpu_start: Pro cpu start user code
+I (191) cpu_start: cpu freq: 160000000 Hz
+I (193) app_init: Application information:
+I (197) app_init: Project name:     puf-dump
+I (201) app_init: App version:      39f7f67-dirty
+I (205) app_init: Compile time:     Oct 12 2026 15:30:43
+I (210) app_init: ELF file SHA256:  90b06d7f5...
+I (215) app_init: ESP-IDF:          v6.1-dev-7651-gc712a0dde38
+I (220) efuse_init: Min chip rev:     v0.0
+I (224) efuse_init: Max chip rev:     v3.99 
+I (228) efuse_init: Chip rev:         v3.1
+I (232) heap_init: Initializing. RAM available for dynamic allocation:
+I (238) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM
+I (243) heap_init: At 3FFB3FB0 len 0002BC50 (175 KiB): DRAM
+I (248) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM
+I (254) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM
+I (259) heap_init: At 4008B244 len 00014DBC (83 KiB): IRAM
+I (266) spi_flash: detected chip: generic
+I (268) spi_flash: flash io: dio
+W (271) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (285) main_task: Started on CPU0
+I (285) main_task: Calling app_main()
+Signature OK
+
+Helper data: 1237 bytes, version 1
+  MAC     d4:e9:f4:ed:8c:00
+  region  0x3FFDFC00, 1024 bytes
+  BCH(255, 179, t=10) x4
+  cells   1020 selected
+All checks passed.
+
+WPRIME f6c80459a9942a2a585a71571185a0d5c9b956233f631841b7785136a2819340c8359b2fb58d953a09b703127059b5db0e6fb2d8e89f540511398ea71ced1c3c8e67c7f64f2310eb773b3ab6f4db2c999fa158159fdfef67ee7a3fdcbd67757e6402060287ae1ec6f21142bc2d6fa621ca52227fa732e47fcb1abd242a110f20
+KEYID 0a0c97ff595a5ef4
+(no BCH yet: equals the enrollment key id only if w' has 0 errors)
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x17 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:6156
+ho 0 tail 12 room 4
+load:0x40078000,len:15712
+load:0x40080400,len:3860
+--- 0x40080400: _invalid_pc_placeholder at /Users/vincenzo/esp32/esp-idf/components/xtensa/xtensa_vectors.S:2259
+entry 0x40080614
+--- 0x40080614: call_start_cpu0 at /Users/vincenzo/esp32/esp-idf/components/bootloader/subproject/main/bootloader_start.c:27
+I (29) boot: ESP-IDF v6.1-dev-7651-gc712a0dde38 2nd stage bootloader
+I (29) boot: compile time Sep 10 2026 17:07:48
+I (30) boot: chip revision: v3.1
+I (32) boot.esp32: SPI Speed      : 40MHz
+I (36) boot.esp32: SPI Mode       : DIO
+I (39) boot.esp32: SPI Flash Size : 2MB
+I (43) boot: Partition Table:
+I (46) boot: ## Label            Usage          Type ST Offset   Length
+I (52) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (58) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (65) boot:  2 factory          factory app      00 00 00010000 00100000
+I (72) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=0af10h ( 44816) map
+I (96) esp_image: segment 1: paddr=0001af38 vaddr=3ffb0000 size=02c4ch ( 11340) load
+I (101) esp_image: segment 2: paddr=0001db8c vaddr=40080000 size=0248ch (  9356) load
+I (105) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=1e86ch (125036) map
+I (153) esp_image: segment 4: paddr=0003e894 vaddr=4008248c size=08db8h ( 36280) load
+I (169) esp_image: segment 5: paddr=00047654 vaddr=50000000 size=00028h (    40) load
+I (175) boot: Loaded app from partition at offset 0x10000
+I (183) cpu_start: Multicore app
+I (191) cpu_start: GPIO 3 and 1 are used as console UART I/O pins
+I (191) cpu_start: Pro cpu start user code
+I (191) cpu_start: cpu freq: 160000000 Hz
+I (193) app_init: Application information:
+I (197) app_init: Project name:     puf-dump
+I (201) app_init: App version:      39f7f67-dirty
+I (205) app_init: Compile time:     Oct 12 2026 15:30:43
+I (210) app_init: ELF file SHA256:  90b06d7f5...
+I (215) app_init: ESP-IDF:          v6.1-dev-7651-gc712a0dde38
+I (220) efuse_init: Min chip rev:     v0.0
+I (224) efuse_init: Max chip rev:     v3.99 
+I (228) efuse_init: Chip rev:         v3.1
+I (232) heap_init: Initializing. RAM available for dynamic allocation:
+I (238) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM
+I (243) heap_init: At 3FFB3FB0 len 0002BC50 (175 KiB): DRAM
+I (248) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM
+I (254) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM
+I (259) heap_init: At 4008B244 len 00014DBC (83 KiB): IRAM
+I (266) spi_flash: detected chip: generic
+I (268) spi_flash: flash io: dio
+W (271) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (285) main_task: Started on CPU0
+I (285) main_task: Calling app_main()
+Signature OK
+
+Helper data: 1237 bytes, version 1
+  MAC     d4:e9:f4:ed:8c:00
+  region  0x3FFDFC00, 1024 bytes
+  BCH(255, 179, t=10) x4
+  cells   1020 selected
+All checks passed.
+
+WPRIME f6c80459a9942a2a585a71571185a0d5c9b956233f631841b7785136a2819340c8359b2fb5ad953a09b703127059b5db0e6fb2d8e89f540511398ea71ced1c3c8e67c7f64f2310eb773b3ab6f4db2cd99fa158159fdfef67ee7a3fdcbd67757e6402060287ae1ec6f21142bc2d6fa621ca52227fa732e47fcb1abd242a110f20
+KEYID 4422e0df1af2296e
+(no BCH yet: equals the enrollment key id only if w' has 0 errors)
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x17 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:6156
+ho 0 tail 12 room 4
+load:0x40078000,len:15712
+load:0x40080400,len:3860
+--- 0x40080400: _invalid_pc_placeholder at /Users/vincenzo/esp32/esp-idf/components/xtensa/xtensa_vectors.S:2259
+entry 0x40080614
+--- 0x40080614: call_start_cpu0 at /Users/vincenzo/esp32/esp-idf/components/bootloader/subproject/main/bootloader_start.c:27
+I (29) boot: ESP-IDF v6.1-dev-7651-gc712a0dde38 2nd stage bootloader
+I (29) boot: compile time Sep 10 2026 17:07:48
+I (30) boot: chip revision: v3.1
+I (32) boot.esp32: SPI Speed      : 40MHz
+I (36) boot.esp32: SPI Mode       : DIO
+I (39) boot.esp32: SPI Flash Size : 2MB
+I (43) boot: Partition Table:
+I (46) boot: ## Label            Usage          Type ST Offset   Length
+I (52) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (58) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (65) boot:  2 factory          factory app      00 00 00010000 00100000
+I (72) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=0af10h ( 44816) map
+I (96) esp_image: segment 1: paddr=0001af38 vaddr=3ffb0000 size=02c4ch ( 11340) load
+I (101) esp_image: segment 2: paddr=0001db8c vaddr=40080000 size=0248ch (  9356) load
+I (105) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=1e86ch (125036) map
+I (153) esp_image: segment 4: paddr=0003e894 vaddr=4008248c size=08db8h ( 36280) load
+I (169) esp_image: segment 5: paddr=00047654 vaddr=50000000 size=00028h (    40) load
+I (175) boot: Loaded app from partition at offset 0x10000
+I (183) cpu_start: Multicore app
+I (191) cpu_start: GPIO 3 and 1 are used as console UART I/O pins
+I (191) cpu_start: Pro cpu start user code
+I (191) cpu_start: cpu freq: 160000000 Hz
+I (193) app_init: Application information:
+I (197) app_init: Project name:     puf-dump
+I (201) app_init: App version:      39f7f67-dirty
+I (205) app_init: Compile time:     Oct 12 2026 15:30:43
+I (210) app_init: ELF file SHA256:  90b06d7f5...
+I (215) app_init: ESP-IDF:          v6.1-dev-7651-gc712a0dde38
+I (220) efuse_init: Min chip rev:     v0.0
+I (224) efuse_init: Max chip rev:     v3.99 
+I (228) efuse_init: Chip rev:         v3.1
+I (232) heap_init: Initializing. RAM available for dynamic allocation:
+I (238) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM
+I (243) heap_init: At 3FFB3FB0 len 0002BC50 (175 KiB): DRAM
+I (248) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM
+I (254) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM
+I (259) heap_init: At 4008B244 len 00014DBC (83 KiB): IRAM
+I (266) spi_flash: detected chip: generic
+I (268) spi_flash: flash io: dio
+W (271) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (285) main_task: Started on CPU0
+I (285) main_task: Calling app_main()
+Signature OK
+
+Helper data: 1237 bytes, version 1
+  MAC     d4:e9:f4:ed:8c:00
+  region  0x3FFDFC00, 1024 bytes
+  BCH(255, 179, t=10) x4
+  cells   1020 selected
+All checks passed.
+
+WPRIME f6c80459a9942a2a585a71571185a0d5c9b956233f631841b7785136a2819340c8359b2fb58d953a09b703127059b5db0e6fb2d8e89f540511398ea71ced1c3c8e67c7f64f2310eb773bbab6f4db2cd99fa158159fdfef67ee7a3fdcbd67757e6402060287ae1ec6f21142bc2d6fa621ca52227fa732e47fcb1abd242a110f20
+KEYID 9ed0c9e6c1fee570
+(no BCH yet: equals the enrollment key id only if w' has 0 errors)
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x17 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:6156
+ho 0 tail 12 room 4
+load:0x40078000,len:15712
+load:0x40080400,len:3860
+--- 0x40080400: _invalid_pc_placeholder at /Users/vincenzo/esp32/esp-idf/components/xtensa/xtensa_vectors.S:2259
+entry 0x40080614
+--- 0x40080614: call_start_cpu0 at /Users/vincenzo/esp32/esp-idf/components/bootloader/subproject/main/bootloader_start.c:27
+I (29) boot: ESP-IDF v6.1-dev-7651-gc712a0dde38 2nd stage bootloader
+I (29) boot: compile time Sep 10 2026 17:07:48
+I (30) boot: chip revision: v3.1
+I (32) boot.esp32: SPI Speed      : 40MHz
+I (36) boot.esp32: SPI Mode       : DIO
+I (39) boot.esp32: SPI Flash Size : 2MB
+I (43) boot: Partition Table:
+I (46) boot: ## Label            Usage          Type ST Offset   Length
+I (52) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (58) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (65) boot:  2 factory          factory app      00 00 00010000 00100000
+I (72) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=0af10h ( 44816) map
+I (96) esp_image: segment 1: paddr=0001af38 vaddr=3ffb0000 size=02c4ch ( 11340) load
+I (101) esp_image: segment 2: paddr=0001db8c vaddr=40080000 size=0248ch (  9356) load
+I (105) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=1e86ch (125036) map
+I (153) esp_image: segment 4: paddr=0003e894 vaddr=4008248c size=08db8h ( 36280) load
+I (169) esp_image: segment 5: paddr=00047654 vaddr=50000000 size=00028h (    40) load
+I (175) boot: Loaded app from partition at offset 0x10000
+I (183) cpu_start: Multicore app
+I (191) cpu_start: GPIO 3 and 1 are used as console UART I/O pins
+I (191) cpu_start: Pro cpu start user code
+I (191) cpu_start: cpu freq: 160000000 Hz
+I (193) app_init: Application information:
+I (197) app_init: Project name:     puf-dump
+I (201) app_init: App version:      39f7f67-dirty
+I (205) app_init: Compile time:     Oct 12 2026 15:30:43
+I (210) app_init: ELF file SHA256:  90b06d7f5...
+I (215) app_init: ESP-IDF:          v6.1-dev-7651-gc712a0dde38
+I (220) efuse_init: Min chip rev:     v0.0
+I (224) efuse_init: Max chip rev:     v3.99 
+I (228) efuse_init: Chip rev:         v3.1
+I (232) heap_init: Initializing. RAM available for dynamic allocation:
+I (238) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM
+I (243) heap_init: At 3FFB3FB0 len 0002BC50 (175 KiB): DRAM
+I (248) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM
+I (254) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM
+I (259) heap_init: At 4008B244 len 00014DBC (83 KiB): IRAM
+I (266) spi_flash: detected chip: generic
+I (268) spi_flash: flash io: dio
+W (271) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (285) main_task: Started on CPU0
+I (285) main_task: Calling app_main()
+Signature OK
+
+Helper data: 1237 bytes, version 1
+  MAC     d4:e9:f4:ed:8c:00
+  region  0x3FFDFC00, 1024 bytes
+  BCH(255, 179, t=10) x4
+  cells   1020 selected
+All checks passed.
+
+WPRIME f6c80459a9942a2a585a71571185a0d5c9b956233f631841b7785136a2819340c835bb2fb58d953a09b703127059b5db0e6fb2d8e89f540511398ea71ced1c3c8e67c7f64f2310eb773bbab6f4db2cd99fa158159fdfef67ee7a3fdcbd67757e6402060287ae1ec6f21142bc2d6fa621ca52227fa732e47fcb1abd242a110f20
+KEYID ceebac4338db685a
+(no BCH yet: equals the enrollment key id only if w' has 0 errors)

@@ -1,10 +1,3 @@
-/*
- * boot.c - Step 1: read the helper data from NVS and check it.
- *
- * No signature and no BCH yet: this only checks that the helper data
- * written from the Mac arrived intact and belongs to this board.
- */
-
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -16,11 +9,26 @@
 #include "heap_memory_layout.h"
 #include "nvs.h"
 #include "nvs_flash.h"
+#include "psa/crypto.h"
 
+#include "crypto.h"
+#include "pk_prov.h"
+#include "puf.h"
 #include "puf_region.h"
 
+/*
+ * DEBUG ONLY. Prints w' on the serial port to check the C extraction
+ * against host/check_wprime.py. w' is almost the key: with it on, the
+ * PUF response leaves the chip. Set to 0 once step (a) is verified.
+ */
+#define PUF_DEBUG_DUMP 1
+
 #define HD_SIZE     1237            /* helper data, bytes */
+#define HD_SIG      64              /* ECDSA signature r || s, at the end */
+#define HD_PAYLOAD  (HD_SIZE - HD_SIG)  /* bytes covered by the signature */
 #define HD_MASK     21              /* offset of the mask */
+
+#define W_MAX_BYTES 128             /* room for w' (1020 bits + padding) */
 
 /* Keep the heap away from the PUF region: nothing will ever write it. */
 SOC_RESERVE_MEMORY_REGION(PUF_ADDR, PUF_ADDR + PUF_SIZE, puf_reserved);
@@ -41,6 +49,24 @@ static void halt(const char *why)
     while (1) {
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
+}
+
+/* Same, with the PSA status code to help debugging. */
+static void halt_status(const char *why, psa_status_t st)
+{
+    printf("HALT: %s (PSA status %d)\n", why, (int)st);
+    while (1) {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
+static void print_hex(const char *tag, const uint8_t *buf, size_t len)
+{
+    printf("%s ", tag);
+    for (size_t i = 0; i < len; i++) {
+        printf("%02x", buf[i]);
+    }
+    printf("\n");
 }
 
 static void load_helper_data(void)
@@ -67,6 +93,86 @@ static void load_helper_data(void)
     }
 }
 
+/*
+ * Check the ECDSA P-256 signature of the helper data with the provisioner
+ * public key built into the firmware (pk_prov.h). The public key cannot
+ * be replaced by rewriting the flash data: it is part of the program.
+ */
+static void verify_signature(void)
+{
+    psa_status_t st = psa_crypto_init();
+    if (st != PSA_SUCCESS) {
+        halt_status("crypto init failed", st);
+    }
+
+    psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
+    psa_set_key_type(&attr, PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1));
+    psa_set_key_bits(&attr, 256);
+    psa_set_key_usage_flags(&attr, PSA_KEY_USAGE_VERIFY_MESSAGE);
+    psa_set_key_algorithm(&attr, PSA_ALG_ECDSA(PSA_ALG_SHA_256));
+
+    psa_key_id_t key;
+    st = psa_import_key(&attr, PK_PROV, sizeof(PK_PROV), &key);
+    if (st != PSA_SUCCESS) {
+        halt_status("cannot import the public key", st);
+    }
+
+    /* SHA-256 of the payload and ECDSA check, in one call. */
+    st = psa_verify_message(key, PSA_ALG_ECDSA(PSA_ALG_SHA_256),
+                            hd, HD_PAYLOAD,
+                            hd + HD_PAYLOAD, HD_SIG);
+    psa_destroy_key(key);
+
+    if (st == PSA_ERROR_INVALID_SIGNATURE) {
+        halt("bad signature: helper data rejected, nothing decoded");
+    }
+    if (st != PSA_SUCCESS) {
+        halt_status("signature check failed", st);
+    }
+    printf("Signature OK\n");
+}
+
+/*
+ * Step (a): w' = masked cells of the snapshot, K_master = SHA-256(w').
+ * No error correction yet.
+ */
+static void rebuild_key_no_ecc(int cells)
+{
+    uint8_t wprime[W_MAX_BYTES];
+    uint8_t k_master[CRYPTO_SHA256_LEN];
+    uint8_t key_id[CRYPTO_KEY_ID_LEN];
+    size_t w_bytes = ((size_t)cells + 7) / 8;
+
+    if (w_bytes > sizeof(wprime)) {
+        halt("w' does not fit its buffer");
+    }
+    if (puf_extract(snapshot, &hd[HD_MASK], PUF_SIZE, wprime, cells) != 0) {
+        halt("mask selects fewer cells than expected");
+    }
+
+    /* The raw response is no longer needed: do not leave it in RAM. */
+    crypto_zeroize(snapshot, sizeof(snapshot));
+
+#if PUF_DEBUG_DUMP
+    print_hex("WPRIME", wprime, w_bytes);
+#endif
+
+    if (crypto_sha256(wprime, w_bytes, k_master) != 0) {
+        crypto_zeroize(wprime, sizeof(wprime));
+        halt("SHA-256 failed");
+    }
+    crypto_zeroize(wprime, sizeof(wprime));
+
+    if (crypto_key_id(k_master, key_id) != 0) {
+        crypto_zeroize(k_master, sizeof(k_master));
+        halt("key id failed");
+    }
+    crypto_zeroize(k_master, sizeof(k_master));
+
+    print_hex("KEYID", key_id, sizeof(key_id));
+    printf("(no BCH yet: equals the enrollment key id only if w' has 0 errors)\n");
+}
+
 void app_main(void)
 {
     /* First instruction: copy the SRAM before anything else writes to it. */
@@ -76,6 +182,9 @@ void app_main(void)
     }
 
     load_helper_data();
+
+    /* Signature first: from here on every field can be trusted. */
+    verify_signature();
 
     if (memcmp(hd, "PUFH", 4) != 0) {
         halt("bad magic");
@@ -115,7 +224,9 @@ void app_main(void)
         halt("mask does not select n * blocks cells");
     }
 
-    printf("All checks passed.\n");
+    printf("All checks passed.\n\n");
+
+    rebuild_key_no_ecc(cells);
 
     while (1) {
         vTaskDelay(pdMS_TO_TICKS(1000));
