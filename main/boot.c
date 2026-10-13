@@ -1,3 +1,11 @@
+/*
+ * boot.c - Step 3b: read the helper data from NVS, check its signature
+ * and its consistency with this board, then rebuild K_master:
+ *   w' (masked cells) -> BCH decoding with W -> w -> SHA-256 -> K_master
+ *
+ * If a block cannot be decoded the device halts without a key.
+ */
+
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -12,21 +20,30 @@
 #include "psa/crypto.h"
 
 #include "crypto.h"
+#include "fuzzy.h"
 #include "pk_prov.h"
 #include "puf.h"
 #include "puf_region.h"
 
 /*
- * DEBUG ONLY. Prints w' on the serial port to check the C extraction
- * against host/check_wprime.py. w' is almost the key: with it on, the
- * PUF response leaves the chip. Set to 0 once step (a) is verified.
+ * DEBUG ONLY. Prints w' (before correction) on the serial port, for
+ * host/check_wprime.py. w' is almost the key: with it on, the PUF
+ * response leaves the chip. Keep it at 0.
  */
-#define PUF_DEBUG_DUMP 1
+#define PUF_DEBUG_DUMP 0
+
+/*
+ * Prints the errors corrected in each block. It reveals how noisy this
+ * boot was, not the key; useful for the report, can be turned off.
+ */
+#define PUF_DEBUG_ERRORS 1
 
 #define HD_SIZE     1237            /* helper data, bytes */
 #define HD_SIG      64              /* ECDSA signature r || s, at the end */
 #define HD_PAYLOAD  (HD_SIZE - HD_SIG)  /* bytes covered by the signature */
 #define HD_MASK     21              /* offset of the mask */
+#define HD_W        1045            /* offset of W */
+#define HD_W_LEN    128             /* bytes of W */
 
 #define W_MAX_BYTES 128             /* room for w' (1020 bits + padding) */
 
@@ -133,20 +150,22 @@ static void verify_signature(void)
 }
 
 /*
- * Step (a): w' = masked cells of the snapshot, K_master = SHA-256(w').
- * No error correction yet.
+ * Rebuild K_master: w' = masked cells of the snapshot, corrected with
+ * the BCH code and W into w, then K_master = SHA-256(w).
  */
-static void rebuild_key_no_ecc(int cells)
+static void rebuild_key(int cells, int blocks)
 {
-    uint8_t wprime[W_MAX_BYTES];
+    uint8_t w[W_MAX_BYTES];
     uint8_t k_master[CRYPTO_SHA256_LEN];
     uint8_t key_id[CRYPTO_KEY_ID_LEN];
+    int errs[HD_W_LEN * 8 / FUZZY_N];
     size_t w_bytes = ((size_t)cells + 7) / 8;
 
-    if (w_bytes > sizeof(wprime)) {
+    if (w_bytes > sizeof(w) || w_bytes > HD_W_LEN ||
+        blocks > (int)(sizeof(errs) / sizeof(errs[0]))) {
         halt("w' does not fit its buffer");
     }
-    if (puf_extract(snapshot, &hd[HD_MASK], PUF_SIZE, wprime, cells) != 0) {
+    if (puf_extract(snapshot, &hd[HD_MASK], PUF_SIZE, w, cells) != 0) {
         halt("mask selects fewer cells than expected");
     }
 
@@ -154,23 +173,42 @@ static void rebuild_key_no_ecc(int cells)
     crypto_zeroize(snapshot, sizeof(snapshot));
 
 #if PUF_DEBUG_DUMP
-    print_hex("WPRIME", wprime, w_bytes);
+    print_hex("WPRIME", w, w_bytes);
 #endif
 
-    if (crypto_sha256(wprime, w_bytes, k_master) != 0) {
-        crypto_zeroize(wprime, sizeof(wprime));
+    /* w' -> w, in place. */
+    fuzzy_init();
+    int ret = fuzzy_reproduce(w, &hd[HD_W], blocks, errs);
+
+#if PUF_DEBUG_ERRORS
+    printf("errors per block:");
+    for (int b = 0; b < blocks; b++) {
+        printf(" %d", errs[b]);
+    }
+    printf("\n");
+#endif
+
+    if (ret != 0) {
+        crypto_zeroize(w, sizeof(w));
+        halt("PUF response too noisy: key not rebuilt");
+    }
+
+    if (crypto_sha256(w, w_bytes, k_master) != 0) {
+        crypto_zeroize(w, sizeof(w));
         halt("SHA-256 failed");
     }
-    crypto_zeroize(wprime, sizeof(wprime));
+    crypto_zeroize(w, sizeof(w));
 
     if (crypto_key_id(k_master, key_id) != 0) {
         crypto_zeroize(k_master, sizeof(k_master));
         halt("key id failed");
     }
+
+    /* Step (c) will derive K_auth and K_enc here, before zeroizing. */
     crypto_zeroize(k_master, sizeof(k_master));
 
+    /* Fingerprint only: it identifies the key without revealing it. */
     print_hex("KEYID", key_id, sizeof(key_id));
-    printf("(no BCH yet: equals the enrollment key id only if w' has 0 errors)\n");
 }
 
 void app_main(void)
@@ -224,9 +262,14 @@ void app_main(void)
         halt("mask does not select n * blocks cells");
     }
 
+    /* The firmware decodes only the code it was built for. */
+    if (n != FUZZY_N || k != FUZZY_K || t != FUZZY_T) {
+        halt("helper data uses a BCH code this firmware does not support");
+    }
+
     printf("All checks passed.\n\n");
 
-    rebuild_key_no_ecc(cells);
+    rebuild_key(cells, blocks);
 
     while (1) {
         vTaskDelay(pdMS_TO_TICKS(1000));
