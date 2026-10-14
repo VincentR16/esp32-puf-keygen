@@ -1,12 +1,13 @@
 /*
  * crypto.c - Symmetric primitives used by the PUF key chain.
+ * See crypto.h for the key chain.
  */
 
 #include <string.h>
 
-#include "psa/crypto.h"
-
 #include "crypto.h"
+
+#define SELFTEST_MSG "puf-selftest"
 
 int crypto_sha256(const uint8_t *in, size_t len, uint8_t out[CRYPTO_SHA256_LEN])
 {
@@ -26,6 +27,96 @@ int crypto_key_id(const uint8_t key[CRYPTO_SHA256_LEN],
     }
     crypto_zeroize(h, sizeof(h));
     return ret;
+}
+
+/*
+ * One HKDF-Expand(K_master, label, 32) straight into a PSA key.
+ * PSA lets a derivation produce a key (output_key) only if its secret
+ * came in as a key with the DERIVE usage, not as raw bytes: that is
+ * why K_master is passed as a key handle here.
+ */
+static psa_status_t hkdf_expand_key(psa_key_id_t k_master, const char *label,
+                                    const psa_key_attributes_t *attr,
+                                    psa_key_id_t *key)
+{
+    psa_key_derivation_operation_t op = PSA_KEY_DERIVATION_OPERATION_INIT;
+    psa_status_t st;
+
+    st = psa_key_derivation_setup(&op, PSA_ALG_HKDF_EXPAND(PSA_ALG_SHA_256));
+    if (st == PSA_SUCCESS) {
+        /* For HKDF-Expand the secret is the PRK: here, K_master. */
+        st = psa_key_derivation_input_key(&op, PSA_KEY_DERIVATION_INPUT_SECRET,
+                                          k_master);
+    }
+    if (st == PSA_SUCCESS) {
+        st = psa_key_derivation_input_bytes(&op, PSA_KEY_DERIVATION_INPUT_INFO,
+                                            (const uint8_t *)label, strlen(label));
+    }
+    if (st == PSA_SUCCESS) {
+        /* Bit size and type come from attr: 256 bits read from the stream. */
+        st = psa_key_derivation_output_key(attr, &op, key);
+    }
+    psa_key_derivation_abort(&op);  /* wipes the operation state */
+    return st;
+}
+
+psa_status_t crypto_derive_keys(const uint8_t k_master[CRYPTO_SHA256_LEN],
+                                psa_key_id_t *k_auth, psa_key_id_t *k_enc)
+{
+    psa_status_t st;
+
+    /* K_master enters PSA as a derivation-only key, used for the two
+     * HKDF-Expand calls and destroyed right after. */
+    psa_key_attributes_t master = PSA_KEY_ATTRIBUTES_INIT;
+    psa_set_key_type(&master, PSA_KEY_TYPE_DERIVE);
+    psa_set_key_bits(&master, 256);
+    psa_set_key_usage_flags(&master, PSA_KEY_USAGE_DERIVE);
+    psa_set_key_algorithm(&master, PSA_ALG_HKDF_EXPAND(PSA_ALG_SHA_256));
+
+    psa_key_id_t km;
+    st = psa_import_key(&master, k_master, CRYPTO_SHA256_LEN, &km);
+    if (st != PSA_SUCCESS) {
+        return st;
+    }
+
+    /* No PSA_KEY_USAGE_EXPORT: the bytes cannot be read back. */
+    psa_key_attributes_t auth = PSA_KEY_ATTRIBUTES_INIT;
+    psa_set_key_type(&auth, PSA_KEY_TYPE_HMAC);
+    psa_set_key_bits(&auth, 256);
+    psa_set_key_usage_flags(&auth, PSA_KEY_USAGE_SIGN_MESSAGE |
+                                   PSA_KEY_USAGE_VERIFY_MESSAGE);
+    psa_set_key_algorithm(&auth, PSA_ALG_HMAC(PSA_ALG_SHA_256));
+
+    psa_key_attributes_t enc = PSA_KEY_ATTRIBUTES_INIT;
+    psa_set_key_type(&enc, PSA_KEY_TYPE_AES);
+    psa_set_key_bits(&enc, 256);
+    psa_set_key_usage_flags(&enc, PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
+    psa_set_key_algorithm(&enc, PSA_ALG_GCM);
+
+    st = hkdf_expand_key(km, CRYPTO_LABEL_AUTH, &auth, k_auth);
+    if (st == PSA_SUCCESS) {
+        st = hkdf_expand_key(km, CRYPTO_LABEL_ENC, &enc, k_enc);
+        if (st != PSA_SUCCESS) {
+            psa_destroy_key(*k_auth);   /* all or nothing */
+        }
+    }
+    psa_destroy_key(km);            /* PSA wipes the key material */
+    return st;
+}
+
+psa_status_t crypto_auth_selftest(psa_key_id_t k_auth, uint8_t out[8])
+{
+    uint8_t mac[PSA_HASH_LENGTH(PSA_ALG_SHA_256)];
+    size_t mac_len = 0;
+    psa_status_t st = psa_mac_compute(k_auth, PSA_ALG_HMAC(PSA_ALG_SHA_256),
+                                      (const uint8_t *)SELFTEST_MSG,
+                                      strlen(SELFTEST_MSG),
+                                      mac, sizeof(mac), &mac_len);
+    if (st == PSA_SUCCESS) {
+        memcpy(out, mac, 8);
+    }
+    crypto_zeroize(mac, sizeof(mac));
+    return st;
 }
 
 /*

@@ -1,9 +1,11 @@
 /*
- * boot.c - Step 3b: read the helper data from NVS, check its signature
- * and its consistency with this board, then rebuild K_master:
+ * boot.c - Step 3c: read the helper data from NVS, check its signature
+ * and its consistency with this board, then rebuild the keys:
  *   w' (masked cells) -> BCH decoding with W -> w -> SHA-256 -> K_master
+ *   K_master -> HKDF-Expand -> K_auth, K_enc (non-exportable PSA keys)
  *
  * If a block cannot be decoded the device halts without a key.
+ * K_master and every intermediate buffer are zeroized after use.
  */
 
 #include <inttypes.h>
@@ -52,6 +54,10 @@ SOC_RESERVE_MEMORY_REGION(PUF_ADDR, PUF_ADDR + PUF_SIZE, puf_reserved);
 
 static uint8_t snapshot[PUF_SIZE];
 static uint8_t hd[HD_SIZE];
+
+/* The only key material that outlives rebuild_key(): PSA handles. */
+static psa_key_id_t k_auth;
+static psa_key_id_t k_enc;
 
 static uint16_t le16(const uint8_t *p) { return p[0] | (p[1] << 8); }
 static uint32_t le32(const uint8_t *p)
@@ -150,8 +156,9 @@ static void verify_signature(void)
 }
 
 /*
- * Rebuild K_master: w' = masked cells of the snapshot, corrected with
- * the BCH code and W into w, then K_master = SHA-256(w).
+ * Rebuild the keys: w' = masked cells of the snapshot, corrected with
+ * the BCH code and W into w, K_master = SHA-256(w), then K_auth and
+ * K_enc derived from K_master. Only the two PSA handles survive.
  */
 static void rebuild_key(int cells, int blocks)
 {
@@ -204,11 +211,21 @@ static void rebuild_key(int cells, int blocks)
         halt("key id failed");
     }
 
-    /* Step (c) will derive K_auth and K_enc here, before zeroizing. */
-    crypto_zeroize(k_master, sizeof(k_master));
+    psa_status_t st = crypto_derive_keys(k_master, &k_auth, &k_enc);
+    crypto_zeroize(k_master, sizeof(k_master));   /* K_master ends here */
+    if (st != PSA_SUCCESS) {
+        halt_status("key derivation failed", st);
+    }
 
     /* Fingerprint only: it identifies the key without revealing it. */
     print_hex("KEYID", key_id, sizeof(key_id));
+
+    uint8_t tag[8];
+    st = crypto_auth_selftest(k_auth, tag);
+    if (st != PSA_SUCCESS) {
+        halt_status("K_auth self-test failed", st);
+    }
+    print_hex("AUTHTEST", tag, sizeof(tag));
 }
 
 void app_main(void)
