@@ -12,9 +12,6 @@ The server gets them here, on the Mac (trusted environment):
   4. write them to keys/server_keys.json (keys/ is git-ignored), with
      the device id (its MAC, from the helper data)
 
-It also prints HMAC(K_auth, "puf-selftest")[:8]: the board prints the
-same value as AUTHTEST, so C and Python derived the same keys.
-
 Note: the stored dumps are equivalent to the key. After the server is
 provisioned they should be deleted; they are kept during development.
 
@@ -43,7 +40,6 @@ ROOT = Path(__file__).resolve().parent.parent
 
 LABEL_AUTH = b"puf-auth-v1"
 LABEL_ENC = b"puf-enc-v1"
-SELFTEST_MSG = b"puf-selftest"
 
 
 def key_id(key):
@@ -98,7 +94,6 @@ def main():
     # 3. derived keys
     k_auth = hkdf_expand(k_master, LABEL_AUTH)
     k_enc = hkdf_expand(k_master, LABEL_ENC)
-    selftest = hmac.new(k_auth, SELFTEST_MSG, hashlib.sha256).digest()[:8].hex()
 
     # 4. server key file, readable by the owner only
     args.out.parent.mkdir(parents=True, exist_ok=True)
@@ -115,7 +110,6 @@ def main():
         json.dump(record, fh, indent=2)
 
     print(f"KEYID    {expected}")
-    print(f"AUTHTEST {selftest}   <- must match the board")
     print(f"server keys written to {args.out}")
 
 

@@ -1,6 +1,6 @@
 /*
- * boot.c - Step 3c: read the helper data from NVS, check its signature
- * and its consistency with this board, then rebuild the keys:
+ * boot.c - Read the helper data from NVS, check its signature and its
+ * consistency with this board, then rebuild the keys:
  *   w' (masked cells) -> BCH decoding with W -> w -> SHA-256 -> K_master
  *   K_master -> HKDF-Expand -> K_auth, K_enc (non-exportable PSA keys)
  *
@@ -14,6 +14,11 @@
  *   device -> server   AUTH   <N_d> <tag_d>   tag_d = HMAC(K_auth, "dev"||N_s||N_d||id)
  *   server -> device   SERVER <tag_s>         tag_s = HMAC(K_auth, "srv"||N_s||N_d||id)
  * Binary fields travel as hex. The server answers DENIED on failure.
+ *
+ * Then the data, encrypted with a fresh session key:
+ *   K_sess = HKDF-Expand(K_enc, "puf-sess-v1" || N_s || N_d)
+ *   device -> server   DATA <seq> <AES-256-GCM(K_sess, plaintext) || tag>
+ * For now the values are fake: the DHT11 comes in the next step.
  */
 
 #include <ctype.h>
@@ -36,13 +41,6 @@
 #include "pk_prov.h"
 #include "puf.h"
 #include "puf_region.h"
-
-/*
- * DEBUG ONLY. Prints w' (before correction) on the serial port, for
- * host/check_wprime.py. w' is almost the key: with it on, the PUF
- * response leaves the chip. Keep it at 0.
- */
-#define PUF_DEBUG_DUMP 0
 
 /*
  * Prints the errors corrected in each block. It reveals how noisy this
@@ -193,10 +191,6 @@ static void rebuild_key(int cells, int blocks)
     /* The raw response is no longer needed: do not leave it in RAM. */
     crypto_zeroize(snapshot, sizeof(snapshot));
 
-#if PUF_DEBUG_DUMP
-    print_hex("WPRIME", w, w_bytes);
-#endif
-
     /* w' -> w, in place. */
     fuzzy_init();
     int ret = fuzzy_reproduce(w, &hd[HD_W], blocks, errs);
@@ -233,13 +227,6 @@ static void rebuild_key(int cells, int blocks)
 
     /* Fingerprint only: it identifies the key without revealing it. */
     print_hex("KEYID", key_id, sizeof(key_id));
-
-    uint8_t tag[8];
-    st = crypto_auth_selftest(k_auth, tag);
-    if (st != PSA_SUCCESS) {
-        halt_status("K_auth self-test failed", st);
-    }
-    print_hex("AUTHTEST", tag, sizeof(tag));
 }
 
 /* ---------- Protocol: one line per message, binary fields in hex ---------- */
@@ -330,6 +317,45 @@ static void authenticate(const uint8_t id[CRYPTO_ID_LEN])
     printf("\nAuthentication OK: device and server share K_auth.\n");
 }
 
+/*
+ * Send encrypted readings forever, one every 2 s, with a session key
+ * derived from K_enc and the two handshake nonces.
+ */
+static void send_data(const uint8_t id[CRYPTO_ID_LEN])
+{
+    psa_key_id_t k_sess;
+    if (crypto_session_key(k_enc, ns, nd, &k_sess) != PSA_SUCCESS) {
+        halt("cannot derive the session key");
+    }
+    printf("Session key derived.\n\n");
+
+    /* seq is the GCM nonce: it starts at 1 and never repeats. */
+    for (uint32_t seq = 1; seq != 0; seq++) {
+        /* Fake values for now: 22.0 ... 26.5 C, 40 ... 49 % */
+        int temp10 = 220 + (int)(seq % 10) * 5;
+        int hum = 40 + (int)(seq % 10);
+        char pt[32];
+        snprintf(pt, sizeof(pt), "%d.%d,%d", temp10 / 10, temp10 % 10, hum);
+
+        uint8_t ct[sizeof(pt) + CRYPTO_GCM_TAG_LEN];
+        size_t ct_len = 0;
+        if (crypto_seal(k_sess, id, seq, (const uint8_t *)pt, strlen(pt),
+                        ct, sizeof(ct), &ct_len) != PSA_SUCCESS) {
+            halt("encryption failed");
+        }
+
+        char hex[2 * sizeof(ct) + 1];
+        char line[200];
+        to_hex(ct, ct_len, hex);
+        snprintf(line, sizeof(line), "DATA %08" PRIx32 " %s", seq, hex);
+        printf("plaintext: %s\n", pt);
+        send_line(line);
+
+        vTaskDelay(pdMS_TO_TICKS(2000));
+    }
+    halt("sequence number exhausted");      /* after 2^32 - 1 messages */
+}
+
 void app_main(void)
 {
     /* First instruction: copy the SRAM before anything else writes to it. */
@@ -398,7 +424,7 @@ void app_main(void)
 
     /* The device identifies itself by its MAC, as in the helper data. */
     authenticate(my_mac);
-    net_close();
+    send_data(my_mac);                       /* does not return */
 
     while (1) {
         vTaskDelay(pdMS_TO_TICKS(1000));
