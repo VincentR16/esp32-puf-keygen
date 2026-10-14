@@ -6,6 +6,9 @@
  *
  * If a block cannot be decoded the device halts without a key.
  * K_master and every intermediate buffer are zeroized after use.
+ *
+ * Then (step 4, transport only): join the WiFi, connect to the server,
+ * send HELLO and print the answer. Nothing is encrypted yet.
  */
 
 #include <inttypes.h>
@@ -23,6 +26,7 @@
 
 #include "crypto.h"
 #include "fuzzy.h"
+#include "net.h"
 #include "pk_prov.h"
 #include "puf.h"
 #include "puf_region.h"
@@ -287,6 +291,28 @@ void app_main(void)
     printf("All checks passed.\n\n");
 
     rebuild_key(cells, blocks);
+
+    /* Network only now: the snapshot is long gone, the WiFi stack may
+     * use any RAM it wants. */
+    if (net_connect() != 0) {
+        halt("network not available");
+    }
+
+    /* The device identifies itself by its MAC, as in the helper data. */
+    char line[64];
+    snprintf(line, sizeof(line), "HELLO %02x%02x%02x%02x%02x%02x",
+             my_mac[0], my_mac[1], my_mac[2], my_mac[3], my_mac[4], my_mac[5]);
+    if (net_send_line(line) != 0) {
+        halt("send failed");
+    }
+    printf("sent:     %s\n", line);
+
+    char reply[64];
+    if (net_recv_line(reply, sizeof(reply)) < 0) {
+        halt("no answer from the server");
+    }
+    printf("received: %s\n", reply);
+    net_close();
 
     while (1) {
         vTaskDelay(pdMS_TO_TICKS(1000));

@@ -1,0 +1,16 @@
+/*
+ * wifi_secrets.example.h - Template for wifi_secrets.h.
+ *
+ *   cp main/wifi_secrets.example.h main/wifi_secrets.h
+ *
+ * then put your values in wifi_secrets.h. That file is git-ignored:
+ * it holds the WiFi password and must never reach the public repo.
+ */
+
+#pragma once
+
+#define WIFI_SSID      "your-network"
+#define WIFI_PASSWORD  "your-password"
+
+#define SERVER_IP      "192.168.1.100"   /* the Mac: ipconfig getifaddr en0 */
+#define SERVER_PORT    5555
