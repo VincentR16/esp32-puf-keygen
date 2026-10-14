@@ -9,7 +9,8 @@ The server gets them here, on the Mac (trusted environment):
      its key id against data/fixed/key_id.txt
   3. K_auth = HKDF-Expand(K_master, "puf-auth-v1", 32)
      K_enc  = HKDF-Expand(K_master, "puf-enc-v1",  32)
-  4. write them to keys/server_keys.json (keys/ is git-ignored)
+  4. write them to keys/server_keys.json (keys/ is git-ignored), with
+     the device id (its MAC, from the helper data)
 
 It also prints HMAC(K_auth, "puf-selftest")[:8]: the board prints the
 same value as AUTHTEST, so C and Python derived the same keys.
@@ -83,7 +84,8 @@ def main():
     args = ap.parse_args()
 
     # 1. signature first, as on the device
-    hd = HelperData.from_bytes(args.hd.read_bytes())
+    hd_bytes = args.hd.read_bytes()
+    hd = HelperData.from_bytes(hd_bytes)
     pk = serialization.load_pem_public_key(args.pk.read_bytes())
     if not hd.verify(pk):
         sys.exit("Signature INVALID: helper data rejected.")
@@ -101,6 +103,7 @@ def main():
     # 4. server key file, readable by the owner only
     args.out.parent.mkdir(parents=True, exist_ok=True)
     record = {
+        "device_id": hd_bytes[5:11].hex(),     # MAC, offset 5 of the helper data
         "key_id": expected,
         "k_auth": k_auth.hex(),
         "k_enc": k_enc.hex(),

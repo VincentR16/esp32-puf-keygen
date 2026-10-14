@@ -54,5 +54,37 @@ psa_status_t crypto_derive_keys(const uint8_t k_master[CRYPTO_SHA256_LEN],
  */
 psa_status_t crypto_auth_selftest(psa_key_id_t k_auth, uint8_t out[8]);
 
+/* ---------- Mutual authentication (challenge-response) ---------- */
+
+#define CRYPTO_NONCE_LEN   16
+#define CRYPTO_ID_LEN      6          /* device id: the MAC address */
+#define CRYPTO_TAG_LEN     32         /* HMAC-SHA256 */
+
+#define CRYPTO_ROLE_DEV    "dev"      /* tag computed by the device */
+#define CRYPTO_ROLE_SRV    "srv"      /* tag computed by the server */
+
+/* Random bytes from the PSA RNG (ESP32 hardware TRNG underneath). */
+psa_status_t crypto_random(uint8_t *out, size_t len);
+
+/*
+ * tag = HMAC(K_auth, role || N_s || N_d || id), role = "dev" or "srv".
+ * Every field has a fixed length, so the concatenation is unambiguous.
+ */
+psa_status_t crypto_auth_tag(psa_key_id_t k_auth, const char *role,
+                             const uint8_t ns[CRYPTO_NONCE_LEN],
+                             const uint8_t nd[CRYPTO_NONCE_LEN],
+                             const uint8_t id[CRYPTO_ID_LEN],
+                             uint8_t tag[CRYPTO_TAG_LEN]);
+
+/*
+ * Check a tag computed as above. Constant-time comparison inside PSA.
+ * Returns PSA_SUCCESS if valid, PSA_ERROR_INVALID_SIGNATURE if not.
+ */
+psa_status_t crypto_auth_verify(psa_key_id_t k_auth, const char *role,
+                                const uint8_t ns[CRYPTO_NONCE_LEN],
+                                const uint8_t nd[CRYPTO_NONCE_LEN],
+                                const uint8_t id[CRYPTO_ID_LEN],
+                                const uint8_t tag[CRYPTO_TAG_LEN]);
+
 /* Overwrite a buffer with zeros; the compiler cannot remove it. */
 void crypto_zeroize(void *buf, size_t len);

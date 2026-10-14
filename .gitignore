@@ -9,4 +9,4 @@ data/
 keys/
 __pycache__/
 pk_prov.h
-main/wifi_secrets.example.hmain/wifi_secrets.h
+main/wifi_secrets.h

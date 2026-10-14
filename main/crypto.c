@@ -119,6 +119,64 @@ psa_status_t crypto_auth_selftest(psa_key_id_t k_auth, uint8_t out[8])
     return st;
 }
 
+psa_status_t crypto_random(uint8_t *out, size_t len)
+{
+    return psa_generate_random(out, len);
+}
+
+#define AUTH_ROLE_LEN  3
+#define AUTH_MSG_LEN   (AUTH_ROLE_LEN + 2 * CRYPTO_NONCE_LEN + CRYPTO_ID_LEN)
+
+/* role || N_s || N_d || id, 41 bytes. Returns -1 on a bad role. */
+static int auth_msg(uint8_t msg[AUTH_MSG_LEN], const char *role,
+                    const uint8_t *ns, const uint8_t *nd, const uint8_t *id)
+{
+    if (strlen(role) != AUTH_ROLE_LEN) {
+        return -1;
+    }
+    uint8_t *p = msg;
+    memcpy(p, role, AUTH_ROLE_LEN);    p += AUTH_ROLE_LEN;
+    memcpy(p, ns, CRYPTO_NONCE_LEN);   p += CRYPTO_NONCE_LEN;
+    memcpy(p, nd, CRYPTO_NONCE_LEN);   p += CRYPTO_NONCE_LEN;
+    memcpy(p, id, CRYPTO_ID_LEN);
+    return 0;
+}
+
+psa_status_t crypto_auth_tag(psa_key_id_t k_auth, const char *role,
+                             const uint8_t ns[CRYPTO_NONCE_LEN],
+                             const uint8_t nd[CRYPTO_NONCE_LEN],
+                             const uint8_t id[CRYPTO_ID_LEN],
+                             uint8_t tag[CRYPTO_TAG_LEN])
+{
+    uint8_t msg[AUTH_MSG_LEN];
+    size_t tag_len = 0;
+    if (auth_msg(msg, role, ns, nd, id) != 0) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+    psa_status_t st = psa_mac_compute(k_auth, PSA_ALG_HMAC(PSA_ALG_SHA_256),
+                                      msg, sizeof(msg),
+                                      tag, CRYPTO_TAG_LEN, &tag_len);
+    if (st == PSA_SUCCESS && tag_len != CRYPTO_TAG_LEN) {
+        st = PSA_ERROR_GENERIC_ERROR;
+    }
+    return st;
+}
+
+psa_status_t crypto_auth_verify(psa_key_id_t k_auth, const char *role,
+                                const uint8_t ns[CRYPTO_NONCE_LEN],
+                                const uint8_t nd[CRYPTO_NONCE_LEN],
+                                const uint8_t id[CRYPTO_ID_LEN],
+                                const uint8_t tag[CRYPTO_TAG_LEN])
+{
+    uint8_t msg[AUTH_MSG_LEN];
+    if (auth_msg(msg, role, ns, nd, id) != 0) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+    /* Recomputes the HMAC and compares in constant time. */
+    return psa_mac_verify(k_auth, PSA_ALG_HMAC(PSA_ALG_SHA_256),
+                          msg, sizeof(msg), tag, CRYPTO_TAG_LEN);
+}
+
 /*
  * A plain memset on a buffer that is never read again is a dead store,
  * and the compiler may delete it. Writing through a volatile pointer

@@ -7,10 +7,16 @@
  * If a block cannot be decoded the device halts without a key.
  * K_master and every intermediate buffer are zeroized after use.
  *
- * Then (step 4, transport only): join the WiFi, connect to the server,
- * send HELLO and print the answer. Nothing is encrypted yet.
+ * Then (step 4): join the WiFi, connect to the server and run the mutual
+ * challenge-response authentication with K_auth:
+ *   device -> server   HELLO  <id>
+ *   server -> device   NONCE  <N_s>
+ *   device -> server   AUTH   <N_d> <tag_d>   tag_d = HMAC(K_auth, "dev"||N_s||N_d||id)
+ *   server -> device   SERVER <tag_s>         tag_s = HMAC(K_auth, "srv"||N_s||N_d||id)
+ * Binary fields travel as hex. The server answers DENIED on failure.
  */
 
+#include <ctype.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -62,6 +68,10 @@ static uint8_t hd[HD_SIZE];
 /* The only key material that outlives rebuild_key(): PSA handles. */
 static psa_key_id_t k_auth;
 static psa_key_id_t k_enc;
+
+/* Nonces of the handshake: the session key will be derived from them. */
+static uint8_t ns[CRYPTO_NONCE_LEN];
+static uint8_t nd[CRYPTO_NONCE_LEN];
 
 static uint16_t le16(const uint8_t *p) { return p[0] | (p[1] << 8); }
 static uint32_t le32(const uint8_t *p)
@@ -232,6 +242,94 @@ static void rebuild_key(int cells, int blocks)
     print_hex("AUTHTEST", tag, sizeof(tag));
 }
 
+/* ---------- Protocol: one line per message, binary fields in hex ---------- */
+
+static void to_hex(const uint8_t *in, size_t len, char *out)
+{
+    for (size_t i = 0; i < len; i++) {
+        sprintf(out + 2 * i, "%02x", in[i]);
+    }
+}
+
+/* Exactly 2 * len hex digits. Returns 0, or -1 if malformed. */
+static int from_hex(const char *in, uint8_t *out, size_t len)
+{
+    if (strlen(in) != 2 * len) {
+        return -1;
+    }
+    for (size_t i = 0; i < 2 * len; i++) {
+        if (!isxdigit((unsigned char)in[i])) {
+            return -1;
+        }
+    }
+    for (size_t i = 0; i < len; i++) {
+        sscanf(in + 2 * i, "%2hhx", &out[i]);
+    }
+    return 0;
+}
+
+static void send_line(const char *line)
+{
+    if (net_send_line(line) != 0) {
+        halt("send failed");
+    }
+    printf("-> %s\n", line);
+}
+
+/* Wait for the server's answer and read the next line. */
+static void recv_line(char *line, size_t len)
+{
+    if (net_recv_line(line, len) < 0) {
+        halt("no answer from the server");
+    }
+    printf("<- %s\n", line);
+    if (strcmp(line, "DENIED") == 0) {
+        halt("server DENIED: it does not recognize this chip's key");
+    }
+}
+
+/* Mutual authentication with K_auth. Halts on any failure. */
+static void authenticate(const uint8_t id[CRYPTO_ID_LEN])
+{
+    char line[160];
+    char hex_a[2 * CRYPTO_TAG_LEN + 1];
+    char hex_b[2 * CRYPTO_TAG_LEN + 1];
+    uint8_t tag[CRYPTO_TAG_LEN];
+
+    /* 1. HELLO <id> */
+    to_hex(id, CRYPTO_ID_LEN, hex_a);
+    snprintf(line, sizeof(line), "HELLO %s", hex_a);
+    send_line(line);
+
+    /* 2. NONCE <N_s> */
+    recv_line(line, sizeof(line));
+    if (strncmp(line, "NONCE ", 6) != 0 ||
+        from_hex(line + 6, ns, CRYPTO_NONCE_LEN) != 0) {
+        halt("expected NONCE");
+    }
+
+    /* 3. AUTH <N_d> <tag_d>: prove this chip holds K_auth */
+    if (crypto_random(nd, CRYPTO_NONCE_LEN) != PSA_SUCCESS ||
+        crypto_auth_tag(k_auth, CRYPTO_ROLE_DEV, ns, nd, id, tag) != PSA_SUCCESS) {
+        halt("cannot compute the device tag");
+    }
+    to_hex(nd, CRYPTO_NONCE_LEN, hex_a);
+    to_hex(tag, CRYPTO_TAG_LEN, hex_b);
+    snprintf(line, sizeof(line), "AUTH %s %s", hex_a, hex_b);
+    send_line(line);
+
+    /* 4. SERVER <tag_s>: the server must prove it holds K_auth too */
+    recv_line(line, sizeof(line));
+    if (strncmp(line, "SERVER ", 7) != 0 ||
+        from_hex(line + 7, tag, CRYPTO_TAG_LEN) != 0) {
+        halt("expected SERVER");
+    }
+    if (crypto_auth_verify(k_auth, CRYPTO_ROLE_SRV, ns, nd, id, tag) != PSA_SUCCESS) {
+        halt("server tag INVALID: not the real server");
+    }
+    printf("\nAuthentication OK: device and server share K_auth.\n");
+}
+
 void app_main(void)
 {
     /* First instruction: copy the SRAM before anything else writes to it. */
@@ -299,19 +397,7 @@ void app_main(void)
     }
 
     /* The device identifies itself by its MAC, as in the helper data. */
-    char line[64];
-    snprintf(line, sizeof(line), "HELLO %02x%02x%02x%02x%02x%02x",
-             my_mac[0], my_mac[1], my_mac[2], my_mac[3], my_mac[4], my_mac[5]);
-    if (net_send_line(line) != 0) {
-        halt("send failed");
-    }
-    printf("sent:     %s\n", line);
-
-    char reply[64];
-    if (net_recv_line(reply, sizeof(reply)) < 0) {
-        halt("no answer from the server");
-    }
-    printf("received: %s\n", reply);
+    authenticate(my_mac);
     net_close();
 
     while (1) {
