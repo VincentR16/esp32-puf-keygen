@@ -29,6 +29,3 @@ int net_send_line(const char *line);
  * or a line too long for buf.
  */
 int net_recv_line(char *buf, size_t len);
-
-/* Close the TCP connection. */
-void net_close(void);

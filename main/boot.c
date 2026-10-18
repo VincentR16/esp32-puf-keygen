@@ -45,12 +45,6 @@
 #include "puf_region.h"
 #include "sensor.h"
 
-/*
- * Prints the errors corrected in each block. It reveals how noisy this
- * boot was, not the key; useful for the report, can be turned off.
- */
-#define PUF_DEBUG_ERRORS 1
-
 #define HD_SIZE     1237            /* helper data, bytes */
 #define HD_SIG      64              /* ECDSA signature r || s, at the end */
 #define HD_PAYLOAD  (HD_SIZE - HD_SIG)  /* bytes covered by the signature */
@@ -60,7 +54,7 @@
 
 #define W_MAX_BYTES 128             /* room for w' (1020 bits + padding) */
 
-#define DATA_PERIOD_MS   20000      /* one reading every 10 s */
+#define DATA_PERIOD_MS   20000      /* one reading every 20 s */
 #define SENSOR_TRIES     3          /* attempts per reading */
 #define SENSOR_RETRY_MS  1500       /* DHT11: at least 1 s between reads */
 
@@ -100,15 +94,6 @@ static void halt_status(const char *why, psa_status_t st)
     while (1) {
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
-}
-
-static void print_hex(const char *tag, const uint8_t *buf, size_t len)
-{
-    printf("%s ", tag);
-    for (size_t i = 0; i < len; i++) {
-        printf("%02x", buf[i]);
-    }
-    printf("\n");
 }
 
 static void load_helper_data(void)
@@ -183,7 +168,6 @@ static void rebuild_key(int cells, int blocks)
 {
     uint8_t w[W_MAX_BYTES];
     uint8_t k_master[CRYPTO_SHA256_LEN];
-    uint8_t key_id[CRYPTO_KEY_ID_LEN];
     int errs[HD_W_LEN * 8 / FUZZY_N];
     size_t w_bytes = ((size_t)cells + 7) / 8;
 
@@ -202,14 +186,6 @@ static void rebuild_key(int cells, int blocks)
     fuzzy_init();
     int ret = fuzzy_reproduce(w, &hd[HD_W], blocks, errs);
 
-#if PUF_DEBUG_ERRORS
-    printf("errors per block:");
-    for (int b = 0; b < blocks; b++) {
-        printf(" %d", errs[b]);
-    }
-    printf("\n");
-#endif
-
     if (ret != 0) {
         crypto_zeroize(w, sizeof(w));
         halt("PUF response too noisy: key not rebuilt");
@@ -221,19 +197,12 @@ static void rebuild_key(int cells, int blocks)
     }
     crypto_zeroize(w, sizeof(w));
 
-    if (crypto_key_id(k_master, key_id) != 0) {
-        crypto_zeroize(k_master, sizeof(k_master));
-        halt("key id failed");
-    }
-
     psa_status_t st = crypto_derive_keys(k_master, &k_auth, &k_enc);
     crypto_zeroize(k_master, sizeof(k_master));   /* K_master ends here */
     if (st != PSA_SUCCESS) {
         halt_status("key derivation failed", st);
     }
-
-    /* Fingerprint only: it identifies the key without revealing it. */
-    print_hex("KEYID", key_id, sizeof(key_id));
+    printf("Key rebuilt.\n");
 }
 
 /* ---------- Protocol: one line per message, binary fields in hex ---------- */
@@ -267,7 +236,6 @@ static void send_line(const char *line)
     if (net_send_line(line) != 0) {
         halt("send failed");
     }
-    printf("-> %s\n", line);
 }
 
 /* Wait for the server's answer and read the next line. */
@@ -276,7 +244,6 @@ static void recv_line(char *line, size_t len)
     if (net_recv_line(line, len) < 0) {
         halt("no answer from the server");
     }
-    printf("<- %s\n", line);
     if (strcmp(line, "DENIED") == 0) {
         halt("server DENIED: it does not recognize this chip's key");
     }
@@ -346,7 +313,7 @@ static int read_sensor(int *temp10, int *hum)
 }
 
 /*
- * Send encrypted readings forever, one every 10 s, with a session key
+ * Send encrypted readings forever, one every DATA_PERIOD_MS, with a session key
  * derived from K_enc and the two handshake nonces.
  */
 static void send_data(const uint8_t id[CRYPTO_ID_LEN])
@@ -385,7 +352,6 @@ static void send_data(const uint8_t id[CRYPTO_ID_LEN])
         char line[200];
         to_hex(ct, ct_len, hex);
         snprintf(line, sizeof(line), "DATA %08" PRIx32 " %s", seq, hex);
-        printf("plaintext: %s\n", pt);
         send_line(line);
 
         if (++seq == 0) {
@@ -411,17 +377,10 @@ void app_main(void)
         halt("bad magic");
     }
 
-    uint8_t version = hd[4];
     const uint8_t *hd_mac = &hd[5];
     uint32_t hd_addr = le32(&hd[11]);
     uint16_t hd_size = le16(&hd[15]);
     uint8_t n = hd[17], k = hd[18], t = hd[19], blocks = hd[20];
-
-    printf("\nHelper data: %d bytes, version %u\n", HD_SIZE, version);
-    printf("  MAC     %02x:%02x:%02x:%02x:%02x:%02x\n",
-           hd_mac[0], hd_mac[1], hd_mac[2], hd_mac[3], hd_mac[4], hd_mac[5]);
-    printf("  region  0x%08" PRIX32 ", %u bytes\n", hd_addr, hd_size);
-    printf("  BCH(%u, %u, t=%u) x%u\n", n, k, t, blocks);
 
     /* The helper data must belong to this chip. */
     uint8_t my_mac[6];
@@ -440,7 +399,6 @@ void app_main(void)
     for (int i = 0; i < hd_size; i++) {
         cells += __builtin_popcount(hd[HD_MASK + i]);
     }
-    printf("  cells   %d selected\n", cells);
     if (cells != n * blocks) {
         halt("mask does not select n * blocks cells");
     }
@@ -450,7 +408,7 @@ void app_main(void)
         halt("helper data uses a BCH code this firmware does not support");
     }
 
-    printf("All checks passed.\n\n");
+    printf("All checks passed.\n");
 
     rebuild_key(cells, blocks);
 

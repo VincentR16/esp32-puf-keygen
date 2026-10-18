@@ -107,7 +107,8 @@ static int tcp_open(void)
 
     if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
         printf("TCP: cannot connect to %s:%d\n", SERVER_IP, SERVER_PORT);
-        net_close();
+        close(sock);
+        sock = -1;
         return -1;
     }
     printf("TCP: connected to %s:%d\n", SERVER_IP, SERVER_PORT);
@@ -174,12 +175,4 @@ int net_recv_line(char *buf, size_t len)
     }
     buf[n] = '\0';
     return (int)n;
-}
-
-void net_close(void)
-{
-    if (sock >= 0) {
-        close(sock);
-        sock = -1;
-    }
 }

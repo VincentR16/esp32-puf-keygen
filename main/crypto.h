@@ -22,21 +22,12 @@
 #include "psa/crypto.h"
 
 #define CRYPTO_SHA256_LEN  32
-#define CRYPTO_KEY_ID_LEN  8
 
 #define CRYPTO_LABEL_AUTH  "puf-auth-v1"
 #define CRYPTO_LABEL_ENC   "puf-enc-v1"
 
 /* out = SHA-256(in). Returns 0 on success, -1 on error. */
 int crypto_sha256(const uint8_t *in, size_t len, uint8_t out[CRYPTO_SHA256_LEN]);
-
-/*
- * Key fingerprint: first 8 bytes of SHA-256(key). Same definition as the
- * key id written by host/enroll.py. It identifies the key without
- * revealing it. Returns 0 on success, -1 on error.
- */
-int crypto_key_id(const uint8_t key[CRYPTO_SHA256_LEN],
-                  uint8_t id[CRYPTO_KEY_ID_LEN]);
 
 /*
  * Derive K_auth and K_enc from K_master straight into two volatile PSA
