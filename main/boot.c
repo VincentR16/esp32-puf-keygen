@@ -18,7 +18,8 @@
  * Then the data, encrypted with a fresh session key:
  *   K_sess = HKDF-Expand(K_enc, "puf-sess-v1" || N_s || N_d)
  *   device -> server   DATA <seq> <AES-256-GCM(K_sess, plaintext) || tag>
- * For now the values are fake: the DHT11 comes in the next step.
+ * The plaintext is "temperature,humidity" from sensor.h (DHT11 or fake);
+ * every valid reading is also shown on display.h (OLED or none).
  */
 
 #include <ctype.h>
@@ -36,11 +37,13 @@
 #include "psa/crypto.h"
 
 #include "crypto.h"
+#include "display.h"
 #include "fuzzy.h"
 #include "net.h"
 #include "pk_prov.h"
 #include "puf.h"
 #include "puf_region.h"
+#include "sensor.h"
 
 /*
  * Prints the errors corrected in each block. It reveals how noisy this
@@ -56,6 +59,10 @@
 #define HD_W_LEN    128             /* bytes of W */
 
 #define W_MAX_BYTES 128             /* room for w' (1020 bits + padding) */
+
+#define DATA_PERIOD_MS   20000      /* one reading every 10 s */
+#define SENSOR_TRIES     3          /* attempts per reading */
+#define SENSOR_RETRY_MS  1500       /* DHT11: at least 1 s between reads */
 
 /* Keep the heap away from the PUF region: nothing will ever write it. */
 SOC_RESERVE_MEMORY_REGION(PUF_ADDR, PUF_ADDR + PUF_SIZE, puf_reserved);
@@ -318,7 +325,28 @@ static void authenticate(const uint8_t id[CRYPTO_ID_LEN])
 }
 
 /*
- * Send encrypted readings forever, one every 2 s, with a session key
+ * One reading, with up to SENSOR_TRIES attempts. A DHT11 read can be
+ * disturbed by the WiFi interrupts; the checksum rejects it, and a new
+ * attempt a moment later usually succeeds. Returns 0 or the last error.
+ */
+static int read_sensor(int *temp10, int *hum)
+{
+    int err = 0;
+    for (int i = 1; i <= SENSOR_TRIES; i++) {
+        err = sensor_read(temp10, hum);
+        if (err == 0) {
+            return 0;
+        }
+        printf("sensor read failed (%d), attempt %d/%d\n", err, i, SENSOR_TRIES);
+        if (i < SENSOR_TRIES) {
+            vTaskDelay(pdMS_TO_TICKS(SENSOR_RETRY_MS));
+        }
+    }
+    return err;
+}
+
+/*
+ * Send encrypted readings forever, one every 10 s, with a session key
  * derived from K_enc and the two handshake nonces.
  */
 static void send_data(const uint8_t id[CRYPTO_ID_LEN])
@@ -329,11 +357,20 @@ static void send_data(const uint8_t id[CRYPTO_ID_LEN])
     }
     printf("Session key derived.\n\n");
 
-    /* seq is the GCM nonce: it starts at 1 and never repeats. */
-    for (uint32_t seq = 1; seq != 0; seq++) {
-        /* Fake values for now: 22.0 ... 26.5 C, 40 ... 49 % */
-        int temp10 = 220 + (int)(seq % 10) * 5;
-        int hum = 40 + (int)(seq % 10);
+    /* seq is the GCM nonce: it starts at 1, grows only when a message
+     * is sent, and never repeats. */
+    uint32_t seq = 1;
+    while (1) {
+        vTaskDelay(pdMS_TO_TICKS(DATA_PERIOD_MS));
+
+        int temp10, hum;
+        if (read_sensor(&temp10, &hum) != 0) {
+            printf("no valid reading: message skipped\n");
+            continue;                       /* nothing sent, seq unchanged */
+        }
+
+        display_show(temp10, hum);
+
         char pt[32];
         snprintf(pt, sizeof(pt), "%d.%d,%d", temp10 / 10, temp10 % 10, hum);
 
@@ -351,9 +388,10 @@ static void send_data(const uint8_t id[CRYPTO_ID_LEN])
         printf("plaintext: %s\n", pt);
         send_line(line);
 
-        vTaskDelay(pdMS_TO_TICKS(2000));
+        if (++seq == 0) {
+            halt("sequence number exhausted");   /* after 2^32 - 1 messages */
+        }
     }
-    halt("sequence number exhausted");      /* after 2^32 - 1 messages */
 }
 
 void app_main(void)
@@ -415,6 +453,14 @@ void app_main(void)
     printf("All checks passed.\n\n");
 
     rebuild_key(cells, blocks);
+
+    if (sensor_init() != 0) {
+        halt("sensor init failed");
+    }
+    /* The display is not essential: without it the device keeps going. */
+    if (display_init() != 0) {
+        printf("display not available, continuing without it\n");
+    }
 
     /* Network only now: the snapshot is long gone, the WiFi stack may
      * use any RAM it wants. */
