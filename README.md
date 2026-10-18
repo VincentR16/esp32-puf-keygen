@@ -6,7 +6,7 @@ No key is stored in flash: dumping the whole memory of the board yields nothing 
 
 ---
 
-## 1. At a glance
+## 1. Overview
 
 | | |
 |---|---|
