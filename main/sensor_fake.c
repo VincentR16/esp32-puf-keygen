@@ -1,7 +1,3 @@
-/*
- * sensor_fake.c - Synthetic readings, for building without a sensor.
- * Cycles through 22.0 ... 26.5 C and 40 ... 49 %.
- */
 
 #include "sensor.h"
 

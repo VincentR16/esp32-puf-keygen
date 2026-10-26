@@ -23,11 +23,7 @@
 #define FB_SIZE   (H_RES * V_RES / 8)
 #define SCALE     2                 /* 5x7 glyphs drawn as 10x14 */
 
-/*
- * FONT 5x7
- * Every character is 5 bytes, one per column.
- * In a byte, bit 0 is the top row and bit 6 the bottom one.
- */
+
 typedef struct {
     char c;
     uint8_t col[5];
@@ -61,14 +57,7 @@ static const glyph_t font[] = {
 static esp_lcd_panel_handle_t panel;    /* NULL until display_init succeeds */
 static uint8_t fb[FB_SIZE];
 
-/*
- * DRAWING INTO THE FRAMEBUFFER
- *
- * The SSD1306 organizes its memory in "pages": every byte holds
- * 8 pixels stacked VERTICALLY, not horizontally.
- *     byte index   = (y / 8) * 128 + x
- *     bit in byte  = y % 8
- */
+
 static void set_pixel(int x, int y)
 {
     if (x < 0 || x >= H_RES || y < 0 || y >= V_RES) return;

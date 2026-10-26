@@ -1,6 +1,4 @@
-/*
- * display_none.c - No display: every call does nothing.
- */
+
 
 #include "display.h"
 

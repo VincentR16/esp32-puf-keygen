@@ -2,22 +2,8 @@
 """
 server_keys.py - Derive the server copy of K_auth and K_enc (step 3c).
 
-The device never exports its keys, and enroll.py never saved them.
-The server gets them here, on the Mac (trusted environment):
-  1. check the helper data signature, as the firmware does
-  2. rebuild K_master from a stored dump with fuzzy.reproduce and check
-     its key id against data/fixed/key_id.txt
-  3. K_auth = HKDF-Expand(K_master, "puf-auth-v1", 32)
-     K_enc  = HKDF-Expand(K_master, "puf-enc-v1",  32)
-  4. write them to keys/server_keys.json (keys/ is git-ignored), with
-     the device id (its MAC, from the helper data)
-
 Note: the stored dumps are equivalent to the key. After the server is
 provisioned they should be deleted; they are kept during development.
-
-Usage:
-    python3 host/server_keys.py
-    python3 host/server_keys.py --dumps data/fixed --out keys/server_keys.json
 """
 
 import argparse

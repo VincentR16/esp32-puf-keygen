@@ -1,16 +1,4 @@
-"""
-fuzzy.py - Fuzzy extractor (code-offset) with BCH(255, 179, t=10).
- 
-Enrollment:      W = w XOR c, where c is the BCH codeword of a random x
-Reconstruction:  c' = w' XOR W  ->  BCH decode  ->  c  ->  w = c XOR W
-Key:             K_master = SHA-256(w)
- 
-w has 1020 bits, split into 4 blocks of 255 bits, one codeword each.
-Standard library only: this is the reference for the C version.
- 
-Run it directly to self-test the BCH code:
-    python3 host/fuzzy.py
-"""
+
 
 import hashlib
 import secrets
@@ -137,10 +125,7 @@ def berlekamp_massey(synd):
  
  
 def bch_decode(r):
-    """
-    N-bit received word -> (codeword, number of corrected errors),
-    or (None, None) if the errors cannot be corrected.
-    """
+   
     synd = syndromes(r)
     if not any(synd):
         return r, 0
@@ -186,7 +171,7 @@ def pack_bits(bits):
     return bytes(out)
  
  
-# ---------- Fuzzy extractor ----------
+#  Fuzzy extractor 
  
 def derive_key(w):
     """K_master = SHA-256 of w packed into bytes."""

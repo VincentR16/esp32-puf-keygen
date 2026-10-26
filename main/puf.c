@@ -1,6 +1,5 @@
 /*
  * puf.c - Select the stable SRAM cells and pack them into w'.
- * See puf.h for the bit conventions.
  */
 
 #include <string.h>

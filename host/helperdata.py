@@ -1,29 +1,3 @@
-#!/usr/bin/env python3
-"""
-helperdata.py - Binary format of the helper data.
-
-Layout (little endian, no padding):
-
-    offset  size   field
-         0     4   magic "PUFH"
-         4     1   version
-         5     6   chip MAC
-        11     4   SRAM region address
-        15     2   SRAM region size in bytes
-        17     1   n     BCH block length
-        18     1   k     message bits per block
-        19     1   t     correctable errors per block
-        20     1   blocks
-        21   1024   mask, one bit per cell (1 = used)
-      1045    128   W, 4 blocks of 255 bits
-      1173     64   ECDSA P-256 signature over every previous byte
-
-Bits are packed MSB first: bit i sits in byte i//8, at position 7-(i%8).
-The same convention is used for the mask, for W and for the SHA-256 of w,
-and the C firmware must follow it exactly.
-
-The signature is ECDSA P-256 over the payload, stored raw as r || s.
-"""
 
 import struct
 from dataclasses import dataclass, field
@@ -65,7 +39,7 @@ class HelperData:
     blocks: int = fuzzy.BLOCKS
     signature: bytes = field(default=b"")
 
-    # ---------- build ----------
+    #  build 
 
     @classmethod
     def build(cls, mac, region_addr, region_bits, cells, helper_ints):
@@ -82,7 +56,7 @@ class HelperData:
                    mask=bits_to_bytes(mask),
                    w_helper=bits_to_bytes(bits))
 
-    # ---------- serialize ----------
+    #  serialize 
 
     def payload(self):
         """Every byte covered by the signature."""
@@ -120,7 +94,7 @@ class HelperData:
                    n=n, k=k, t=t, blocks=blocks,
                    signature=data[start:])
 
-    # ---------- signature ----------
+    #  signature 
 
     def sign(self, private_key):
         """Sign the payload. Signature stored raw as r || s, like PSA wants."""
@@ -141,7 +115,7 @@ class HelperData:
         except InvalidSignature:
             return False
 
-    # ---------- use ----------
+    #  use 
 
     def cells(self):
         """Indices of the cells selected by the mask, in address order."""

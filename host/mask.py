@@ -1,15 +1,5 @@
 #!/usr/bin/env python3
-"""
-mask.py - Build the stable-cell mask and measure the residual error.
 
-The first 40 dumps build the mask: a cell is stable if it has the same
-value in all of them. The key uses the first 1020 stable cells, that is
-4 blocks of BCH(255, 179, t=10). The remaining dumps are used only to
-check how many of those cells still flip.
-
-Usage:
-    python host/mask.py --label enr
-"""
 
 import argparse
 import os
@@ -38,13 +28,7 @@ def to_bits(dump):
 
 
 def build_mask(train):
-    """
-    Return (cells, golden, n_stable):
-      cells    indices of the first N_CELLS stable cells
-      golden   their reference values
-      n_stable how many stable cells exist in total
-    Stable = same value in every training dump.
-    """
+  
     first = train[0]
     stable = [i for i in range(len(first))
               if all(bits[i] == first[i] for bits in train)]

@@ -2,23 +2,13 @@
 """
 server.py - TCP server for the PUF device (step 4).
 
-1. Mutual authentication with K_auth (keys/server_keys.json):
-    device -> server   HELLO  <id>
-    server -> device   NONCE  <N_s>
-    device -> server   AUTH   <N_d> <tag_d>   tag_d = HMAC(K_auth, "dev"||N_s||N_d||id)
-    server -> device   SERVER <tag_s>         tag_s = HMAC(K_auth, "srv"||N_s||N_d||id)
-   On any failure the server answers DENIED and closes the connection.
+1 Mutual authentication with K_auth (keys/server_keys.json):
 
-2. Encrypted data with a session key:
-    K_sess = HKDF-Expand(K_enc, "puf-sess-v1" || N_s || N_d, 32)
-    device -> server   DATA <seq> <ciphertext || tag>
-   AES-256-GCM, nonce = 0^8 || seq, AD = "data" || id || seq.
-   The tag is checked first, then seq must be strictly increasing (replay).
+
+2 Encrypted data with a session key:
+    
 
 Needs the `cryptography` package (AES-GCM): run it with the project venv.
-
-Usage:
-    python3 host/server.py
 """
 
 import argparse
@@ -75,7 +65,7 @@ class Device(socketserver.StreamRequestHandler):
             self.receive_data(*session)
         self.log("closed")
 
-    # ---------- 1. authentication ----------
+    #  authentication 
 
     def authenticate(self):
         """-> (dev_id, K_sess) on success, None after sending DENIED."""
@@ -107,7 +97,7 @@ class Device(socketserver.StreamRequestHandler):
         self.send("DENIED")
         return None
 
-    # ---------- 2. encrypted data ----------
+    #   encrypted data 
 
     def receive_data(self, dev_id, k_sess):
         gcm = AESGCM(k_sess)
@@ -145,7 +135,7 @@ class Device(socketserver.StreamRequestHandler):
         self.log(f"seq {seq}: temperature {temp} C, humidity {hum} %")
         return True
 
-    # ---------- line I/O ----------
+    #  line I/O 
 
     def recv(self):
         line = self.rfile.readline().decode(errors="replace").rstrip("\r\n")
